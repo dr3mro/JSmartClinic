@@ -248,4 +248,4 @@ Severity: 🔴 Critical (data loss, safety, or security) · 🟠 High (feature b
 | 2026-11-03 | S-0 | 7be2cdb | Initialised git, updated `.gitignore`, removed stray `.DS_Store` files, baseline commit. |
 | 2026-11-03 | C-00 | 8bd370d | Added `users.clinician` (V003), clinician-admin permissions, first-run/settings controls, provider lookup, and permission hints. New `ClinicianAdminTest`. |
 | 2026-11-03 | C-01 | 8063887 | Added `encounters.amends_encounter_id` (V004); addenda start as editable drafts, `signed()` uses `signed_at`, signing links and locks both notes. Updated encounter tests and UI links. |
-| 2026-11-03 | C-02 | pending | Replaced the signed-encounter trigger (V005): signed content and metadata are immutable, only `SIGNED -> AMENDED` is allowed, and signed rows cannot be deleted. Extended JDBC trigger tests. |
+| 2026-11-03 | C-02 | c9f3f45 | Replaced the signed-encounter trigger (V005): signed content and metadata are immutable, only `SIGNED -> AMENDED` is allowed, and signed rows cannot be deleted. Extended JDBC trigger tests. |
