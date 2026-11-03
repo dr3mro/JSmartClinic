@@ -18,7 +18,7 @@ Severity: 🔴 Critical (data loss, safety, or security) · 🟠 High (feature b
 
 **Done:** S-0, C-00 → C-08. There are 10 commits; the last is `1215817`. See the Fix Log.
 **Done since:** C-09 (`saveResult(orderId, resultId, numeric, text)` reads test, patient and status from the DB; rejects cancelled or mismatched orders). **Previously in progress:** **C-09.** The failing tests are written but **not committed** (`src/test/.../LabServiceTest.java`). They change `saveResult` to `saveResult(orderId, resultId, numeric, text)` and add `resultsCannotBeEnteredOnCancelledOrders`. Next, implement the service and repository change in `LabService.saveResult`/`LabRepository`, then update the callers in `ui/labs/LabResultDialog.java` and `ui/patients/PatientChartController.java`. After that, run `./mvnw -q clean verify` and commit as `fix(C-09)`.
-**Remaining (65):** C-09 C-10 C-11 · A-01 → A-15 · B-01 → B-07 · D-01 → D-05 · P-01 → P-05 · U-01 → U-06 · H-01 → H-07 · V-01 → V-18 (Batch 8, visual UI)
+**Remaining (65):** C-09 C-10 C-11 · A-01 → A-15 · B-01 → B-07 · D-01 → D-05 · P-01 → P-05 · U-01 → U-06 · H-01 → H-07 · V-01 → V-18 (Batch 8, visual UI) · F-01 (Batch 9, update checker)
 
 **Migration numbering:** V003–V007 are already used, one migration per fix. **The next migration is `V008__…sql`.** Wherever this plan says "V003", use the next free number instead, and add it to `index.txt`.
 
@@ -317,6 +317,25 @@ Continue fix-plan.md from the "RESUME HERE" section. First run `git status` and 
 
 ---
 
+## Batch 9 — Features 🟢
+
+- [ ] **F-01 🟢 In-app update check from GitHub Releases**
+  - *Goal:* On startup (and from Settings → "Check now"), the app checks `https://api.github.com/repos/dr3mro/JSmartClinic/releases/latest`. If a newer version exists, it offers the update without blocking work.
+  - *Current version:* Read it from the `jpackage.app-version` system property, which jpackage sets in packaged apps. Fall back to the JAR manifest's `Implementation-Version`, or `dev` when running from IntelliJ, in which case don't check. Add `<addDefaultImplementationEntries>true</addDefaultImplementationEntries>` to the jar plugin manifest so the manifest has the version.
+  - *Implementation:* Add a new `service/UpdateService` using `java.net.http.HttpClient` (add `requires java.net.http;` to `module-info.java`), and parse the response with Jackson. Run the check in the background through `Async`, with a 5 s timeout. Check at most once every 24 h (`settings.last_update_check`). Never show an error dialog for this; only log failures.
+  - *Version compare:* Compare semantic versions (`1.10.0 > 1.9.2`). Tags look like `v1.2.0`. Skip `prerelease`/`draft` releases unless the "Include beta versions" setting is on.
+  - *UI:* Show a dismissible banner at the top of the main window: "JSmartClinic 1.2.0 is available — **What's new** · **Download** · Skip this version · Later". "What's new" shows the release `body` (markdown as plain text) in a dialog. Settings → General gets the checkbox "Check for updates automatically" (on by default), a "Check now" button, the last-checked time and the current version.
+  - *Download:* Pick the asset by OS: `.dmg` on macOS, `.exe`/`.msi` on Windows (match the arch where possible). Stream it to the user's Downloads folder with a progress bar and a Cancel button.
+  - *Integrity check:* Verify its SHA-256 against the release's `SHA256SUMS.txt` asset; on a mismatch, delete the file and warn. Then open the installer with `Desktop.open` and ask the user to quit the app. Never install silently or replace files in place.
+  - *Security:* HTTPS only. Allow only the hosts `api.github.com`, `github.com` and `objects.githubusercontent.com` (check the host after each redirect). Cap downloads at 300 MB.
+  - *Authenticity:* `SHA256SUMS.txt` only catches corruption, because it comes from the same release. To prove authenticity, add release signing: an Ed25519 signature `SHA256SUMS.txt.sig`, made in CI from a repository secret and verified against a public key embedded in the app. Later, add Apple notarization and Windows Authenticode signing.
+  - *Privacy & data safety:* Send no patient data and no identifiers (a generic `User-Agent: JSmartClinic/<version>`). Before opening the installer, run `BackupService.backupNow()` so that a database migration in the new version is reversible.
+  - *Private repo:* If the GitHub repo is private, the API needs a token. Either make releases public (or use a separate public "releases" repo), or the feature can't work for end users. Decide this before implementing.
+  - *Tests:* Version comparison; parsing a recorded `releases/latest` JSON fixture; asset selection per OS; "skip this version"; the 24 h throttle; checksum mismatch → file deleted; a disallowed redirect host is rejected. Use a local `HttpServer` stub, never the real network.
+  - *Release process (add it to the README):* Bump `<app.version>` in `pom.xml`, commit, then `git tag v1.1.0 && git push origin v1.1.0`. CI builds the DMG and EXE and publishes them as a GitHub Release together with `SHA256SUMS.txt`.
+
+---
+
 ## Definition of Done
 1. Every box is ticked, and each fix has a test where one is possible.
 2. `./mvnw -q clean verify` passes, and service/repository coverage is still at least 70%.
@@ -335,5 +354,6 @@ Continue fix-plan.md from the "RESUME HERE" section. First run `git status` and 
 | 2026-11-03 | C-05 | 9ac80c7 | Save/sign/delete now require the draft's provider; added audited `takeOverDraft()` for doctors/admins and a "Take over draft" editor action. |
 | 2026-11-03 | C-06 | a1cc44f | Added an editor change counter; autosave clears the dirty flag only when no edits arrived while the save was in flight. |
 | 2026-11-03 | C-07 | 33c889e | Added `Navigator.CanLeave`; navigation, logout and lock now ask the editor to save/confirm first. Automatic locks save silently and never wait for a prompt. New `NavigationGuardTest`. |
+| 2026-11-03 | CI | (this commit) | `build.yml`: JDK 25; `package-mac`/`package-win` matrix; version taken from the tag (`v1.2.0` → `1.2.0`, otherwise `1.0.<run>`); pushing a `v*` tag now publishes a **GitHub Release** with the DMG, the EXE and `SHA256SUMS.txt`. Main-branch builds still upload run artifacts. |
 | 2026-11-03 | C-09 | (this commit) | `LabService.saveResult` now takes only order and result IDs, loads the row with `LabRepository.resultRow`, rejects cancelled or mismatched orders, and audits the stored patient. Added `AppContext.auditEvents()`. |
 | 2026-11-03 | C-08 | 5671184 | Added explicit `crit_low`/`crit_high` limits (V007) seeded for potassium, sodium and glucose. CRITICAL now requires crossing a critical limit; the Settings editor and result preview use the same logic. |
