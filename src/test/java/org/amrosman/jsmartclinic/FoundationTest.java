@@ -32,7 +32,7 @@ class FoundationTest {
         new MigrationRunner(database).migrate();
 
         try (Connection connection = database.getConnection()) {
-            assertThat(Jdbc.count(connection, "SELECT COUNT(*) FROM schema_version")).isEqualTo(4);
+            assertThat(Jdbc.count(connection, "SELECT COUNT(*) FROM schema_version")).isEqualTo(5);
             assertThat(Jdbc.count(connection, "SELECT COUNT(*) FROM lab_tests")).isEqualTo(17);
             assertThat(Jdbc.count(connection, "SELECT COUNT(*) FROM services")).isEqualTo(8);
             assertThat(Jdbc.count(connection, "SELECT COUNT(*) FROM users")).isZero();
@@ -82,6 +82,19 @@ class FoundationTest {
                 Jdbc.update(connection, "UPDATE encounters SET assessment='tampered' WHERE id=?", encounter.id());
             }
         }).isInstanceOf(SQLException.class).hasMessageContaining("immutable");
+
+        assertThatThrownBy(() -> {
+            try (Connection connection = context.database().getConnection()) {
+                Jdbc.update(connection, "UPDATE encounters SET status='AMENDED', assessment='tampered' WHERE id=?",
+                        encounter.id());
+            }
+        }).isInstanceOf(SQLException.class).hasMessageContaining("immutable");
+
+        assertThatThrownBy(() -> {
+            try (Connection connection = context.database().getConnection()) {
+                Jdbc.update(connection, "DELETE FROM encounters WHERE id=?", encounter.id());
+            }
+        }).isInstanceOf(SQLException.class).hasMessageContaining("Signed encounters cannot be deleted");
     }
 
     @Test

@@ -31,7 +31,7 @@ Severity: 🔴 Critical (data loss, safety, or security) · 🟠 High (feature b
   - *Fix:* Add migration `V003`: `ALTER TABLE encounters ADD COLUMN amends_encounter_id INTEGER REFERENCES encounters(id)`. Create addenda as `DRAFT` with `amends_encounter_id` set and `signed_at`/`signed_by` set to NULL. When an addendum is signed, set it to `SIGNED`, and set the **original** to `AMENDED` without changing its content. `save()` must reject any encounter whose `signed_at` is not null. Make `signed()` mean `signedAt != null`. In the chart and editor, show "Addendum to encounter #N" and link the two notes.
   - *Tests:* Amend → the addendum is editable → sign → saving the addendum throws → the original's content is unchanged.
 
-- [ ] **C-02 🔴 The DB trigger lets signed content be overwritten** — `V001__init.sql` trigger `encounters_signed_immutable`
+- [x] **C-02 🔴 The DB trigger lets signed content be overwritten** — `V001__init.sql` trigger `encounters_signed_immutable`
   - *Problem:* `WHEN OLD.status='SIGNED' AND NEW.status<>'AMENDED'` lets a single UPDATE change the status to `AMENDED` **and** rewrite the SOAP text at the same time. `AMENDED` rows have no protection, and DELETE isn't blocked at all.
   - *Fix:* In `V003`, drop the trigger and recreate it. Block any UPDATE where `OLD.signed_at IS NOT NULL` that changes `chief_complaint, subjective, objective, assessment, plan, template_data, patient_id, provider_id, encounter_date, signed_at, signed_by`. Allow only the status change from `SIGNED` to `AMENDED`. Add a `BEFORE DELETE` trigger that blocks deleting signed rows.
   - *Tests:* Direct JDBC updates and deletes on a signed row must fail.
@@ -246,5 +246,6 @@ Severity: 🔴 Critical (data loss, safety, or security) · 🟠 High (feature b
 | Date | ID | Commit | Notes |
 |---|---|---|---|
 | 2026-11-03 | S-0 | 7be2cdb | Initialised git, updated `.gitignore`, removed stray `.DS_Store` files, baseline commit. |
-| 2026-11-03 | C-00 | a58f4ae | Added `users.clinician` (V003), clinician-admin permissions, first-run/settings controls, provider lookup, and permission hints. New `ClinicianAdminTest`. |
+| 2026-11-03 | C-00 | 8bd370d | Added `users.clinician` (V003), clinician-admin permissions, first-run/settings controls, provider lookup, and permission hints. New `ClinicianAdminTest`. |
 | 2026-11-03 | C-01 | 8063887 | Added `encounters.amends_encounter_id` (V004); addenda start as editable drafts, `signed()` uses `signed_at`, signing links and locks both notes. Updated encounter tests and UI links. |
+| 2026-11-03 | C-02 | pending | Replaced the signed-encounter trigger (V005): signed content and metadata are immutable, only `SIGNED -> AMENDED` is allowed, and signed rows cannot be deleted. Extended JDBC trigger tests. |
