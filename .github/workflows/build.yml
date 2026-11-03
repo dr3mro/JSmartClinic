@@ -34,14 +34,9 @@ jobs:
             distribution: temurin
             java-package: jdk
             fx: ""
-          # Windows ARM64 is not built: neither Maven Central nor Azul publishes JavaFX for
-          # win-aarch64 (checked 2026-11-03). The x64 installer runs on Windows ARM via emulation.
-          # When a JDK with JavaFX for win-aarch64 exists, add an entry with os: windows-11-arm
-          # and fx: "-Djavafx.bundled=true" (the pom already supports it).
-
     steps:
       - name: Check out
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up JDK 25
         uses: actions/setup-java@v5
@@ -99,10 +94,99 @@ jobs:
           path: target/site/jacoco
           if-no-files-found: warn
 
+  windows-arm64:
+    # Neither Maven Central nor Azul ships JavaFX for win-aarch64, so build OpenJFX from
+    # source on an ARM runner, link it into a JDK, and package with -Djavafx.bundled.
+    # Experimental: a failure here never blocks the macOS/Windows x64 release.
+    name: Package (Windows-arm64, OpenJFX from source)
+    runs-on: windows-11-arm
+    continue-on-error: true
+    env:
+      JFX_REPO: openjdk/jfx25u     # OpenJFX 25 update releases
+      JFX_REF: master
+    steps:
+      - name: Check out
+        uses: actions/checkout@v5
+
+      - name: Set up JDK 25 (ARM64)
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "25"
+          architecture: aarch64
+          cache: maven
+
+      - name: Work out the app version
+        id: version
+        shell: bash
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then VERSION="${GITHUB_REF_NAME#v}"; else VERSION="1.0.${GITHUB_RUN_NUMBER}"; fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Restore cached OpenJFX build
+        id: jfx-cache
+        uses: actions/cache@v4
+        with:
+          path: jfx/build/jmods
+          key: openjfx-win-aarch64-${{ env.JFX_REPO }}-${{ env.JFX_REF }}-v1
+
+      - name: Install OpenJFX build tools
+        if: steps.jfx-cache.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: choco install ant ninja cmake --no-progress -y
+
+      - name: Build OpenJFX for Windows ARM64
+        if: steps.jfx-cache.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          git clone --depth 1 --branch "$JFX_REF" "https://github.com/$JFX_REPO.git" jfx
+          cd jfx
+          ./gradlew.bat --no-daemon sdk jmods
+          ls build/jmods
+
+      - name: Link a JDK that includes JavaFX
+        shell: bash
+        run: |
+          MODS=$("$JAVA_HOME/bin/java" --list-modules | sed 's/@.*//' | paste -sd, -)
+          MP="jfx/build/jmods"
+          if [ -d "$JAVA_HOME/jmods" ]; then MP="$JAVA_HOME/jmods;$MP"; fi
+          "$JAVA_HOME/bin/jlink" --module-path "$MP" --add-modules "$MODS,ALL-MODULE-PATH" \
+            --output "$RUNNER_TEMP/jdk-fx"
+          "$RUNNER_TEMP/jdk-fx/bin/java" --list-modules | grep javafx
+          echo "JAVA_HOME=$RUNNER_TEMP/jdk-fx" >> "$GITHUB_ENV"
+          echo "$RUNNER_TEMP/jdk-fx/bin" >> "$GITHUB_PATH"
+
+      - name: Install WiX
+        shell: pwsh
+        run: choco install wixtoolset --no-progress -y
+
+      - name: Verify
+        shell: bash
+        run: ./mvnw -B -Djavafx.bundled=true verify
+
+      - name: Package installer
+        shell: bash
+        run: ./mvnw -B -Ppackage-win -Djavafx.bundled=true -DskipTests -Dapp.version=${{ steps.version.outputs.version }} package
+
+      - name: Name installer by platform
+        shell: bash
+        run: |
+          cd target/dist
+          for f in *; do mv "$f" "${f%.*}-Windows-arm64.${f##*.}"; done
+          ls -l
+
+      - name: Upload installer (run artifact)
+        uses: actions/upload-artifact@v4
+        with:
+          name: JSmartClinic-Windows-arm64-${{ steps.version.outputs.version }}
+          path: target/dist/*
+          if-no-files-found: error
+
   release:
     name: Publish GitHub Release
-    needs: verify-and-package
-    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [verify-and-package, windows-arm64]
+    # Publish even if the experimental ARM64 job failed; its installer is simply omitted.
+    if: always() && startsWith(github.ref, 'refs/tags/v') && needs.verify-and-package.result == 'success'
     runs-on: ubuntu-latest
     permissions:
       contents: write
