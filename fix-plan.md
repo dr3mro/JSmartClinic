@@ -55,7 +55,7 @@ Severity: 🔴 Critical (data loss, safety, or security) · 🟠 High (feature b
   - *Problem:* Only `onBack()` asks for confirmation. Sidebar navigation, global search, logout and the inactivity lock all drop the draft without asking.
   - *Fix:* Add a `Navigator.CanLeave` interface that `EncounterEditorController` implements. It saves silently, or asks first. `Navigator.show()` and `MainController` (logout and lock) must call it before switching views.
 
-- [ ] **C-08 🔴 "Critical" lab flags are arbitrary** — `LabService.flagFor`, `V002__seed.sql`
+- [x] **C-08 🔴 "Critical" lab flags are arbitrary** — `LabService.flagFor`, `V002__seed.sql`
   - *Problem:* "Critical" is calculated as 50% of the reference span beyond the limits. For example, fasting glucose 70–99 is flagged critical above 113.5, CRP 0–5 above 7.5, and HbA1c above 6.4. That's clinically wrong, and it trains users to ignore the flag.
   - *Fix:* `V003`: `ALTER TABLE lab_tests ADD COLUMN crit_low REAL; ADD COLUMN crit_high REAL`. Flag CRITICAL **only** when an explicit critical limit is crossed. Otherwise flag LOW, HIGH or NORMAL. Add critical-limit fields to the lab catalogue editor in Settings. Seed only well-known limits (e.g. K <2.5/>6.5, Na <120/>160, glucose <40/>450), each with a comment.
   - *Tests:* Glucose 130 is HIGH, not CRITICAL. K 6.8 is CRITICAL.
@@ -254,3 +254,4 @@ Severity: 🔴 Critical (data loss, safety, or security) · 🟠 High (feature b
 | 2026-11-03 | C-05 | 9ac80c7 | Save/sign/delete now require the draft's provider; added audited `takeOverDraft()` for doctors/admins and a "Take over draft" editor action. |
 | 2026-11-03 | C-06 | a1cc44f | Added an editor change counter; autosave clears the dirty flag only when no edits arrived while the save was in flight. |
 | 2026-11-03 | C-07 | 33c889e | Added `Navigator.CanLeave`; navigation, logout and lock now ask the editor to save/confirm first. Automatic locks save silently and never wait for a prompt. New `NavigationGuardTest`. |
+| 2026-11-03 | C-08 | pending | Added explicit `crit_low`/`crit_high` limits (V007) seeded for potassium, sodium and glucose. CRITICAL now requires crossing a critical limit; the Settings editor and result preview use the same logic. |

@@ -114,16 +114,48 @@ class LabServiceTest {
         assertThat(context.labs().flagFor(null, 10.0)).isNull();
         assertThat(context.labs().flagFor(hgb, 14.0)).isEqualTo(LabFlag.NORMAL);
         assertThat(context.labs().flagFor(hgb, 10.0)).isEqualTo(LabFlag.LOW);
-        assertThat(context.labs().flagFor(hgb, 5.0)).isEqualTo(LabFlag.CRITICAL);
+        assertThat(context.labs().flagFor(hgb, 5.0)).isEqualTo(LabFlag.LOW);
         assertThat(context.labs().flagFor(hgb, 18.5)).isEqualTo(LabFlag.HIGH);
-        assertThat(context.labs().flagFor(hgb, 25.0)).isEqualTo(LabFlag.CRITICAL);
+        assertThat(context.labs().flagFor(hgb, 25.0)).isEqualTo(LabFlag.HIGH);
 
-        LabTest lowOnly = new LabTest(0, "LOWONLY", "Low only", null, 10.0, null, "Custom");
+        LabTest lowOnly = new LabTest(0, "LOWONLY", "Low only", null, 10.0, null, null, null, "Custom");
         assertThat(context.labs().flagFor(lowOnly, 9.0)).isEqualTo(LabFlag.LOW);
         assertThat(context.labs().flagFor(lowOnly, 11.0)).isEqualTo(LabFlag.NORMAL);
-        LabTest highOnly = new LabTest(0, "HIGHONLY", "High only", null, null, 10.0, "Custom");
+        LabTest highOnly = new LabTest(0, "HIGHONLY", "High only", null, null, 10.0, null, null, "Custom");
         assertThat(context.labs().flagFor(highOnly, 11.0)).isEqualTo(LabFlag.HIGH);
         assertThat(context.labs().flagFor(highOnly, 9.0)).isEqualTo(LabFlag.NORMAL);
+    }
+
+    @Test
+    void criticalFlagsRequireExplicitCriticalLimits() {
+        LabTest glucose = test("GLU");
+        assertThat(glucose.critLow()).isEqualTo(40.0);
+        assertThat(glucose.critHigh()).isEqualTo(450.0);
+        assertThat(context.labs().flagFor(glucose, 130.0)).isEqualTo(LabFlag.HIGH);
+        assertThat(context.labs().flagFor(glucose, 30.0)).isEqualTo(LabFlag.CRITICAL);
+        assertThat(context.labs().flagFor(glucose, 500.0)).isEqualTo(LabFlag.CRITICAL);
+
+        LabTest potassium = test("K");
+        assertThat(context.labs().flagFor(potassium, 5.5)).isEqualTo(LabFlag.HIGH);
+        assertThat(context.labs().flagFor(potassium, 6.8)).isEqualTo(LabFlag.CRITICAL);
+        assertThat(context.labs().flagFor(potassium, 2.0)).isEqualTo(LabFlag.CRITICAL);
+
+        LabTest crp = test("CRP");
+        assertThat(crp.critLow()).isNull();
+        assertThat(crp.critHigh()).isNull();
+        assertThat(context.labs().flagFor(crp, 8.0)).isEqualTo(LabFlag.HIGH);
+    }
+
+    @Test
+    void catalogueStoresCriticalLimits() {
+        context.session().login(context.users().byId(1));
+        context.labs().saveTest(0, "TESTCRIT", "Critical marker", "mg/L", 1.0, 2.0, 0.5, 5.0, "Custom");
+        LabTest created = context.labs().tests().stream()
+                .filter(t -> "TESTCRIT".equals(t.code())).findFirst().orElseThrow();
+        assertThat(created.critLow()).isEqualTo(0.5);
+        assertThat(created.critHigh()).isEqualTo(5.0);
+        assertThat(context.labs().flagFor(created, 4.0)).isEqualTo(LabFlag.HIGH);
+        assertThat(context.labs().flagFor(created, 6.0)).isEqualTo(LabFlag.CRITICAL);
     }
 
     @Test

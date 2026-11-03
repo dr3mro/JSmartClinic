@@ -32,14 +32,22 @@ public final class LabService {
     }
 
     public void saveTest(long id, String code, String name, String unit, Double low, Double high, String category) {
+        saveTest(id, code, name, unit, low, high, null, null, category);
+    }
+
+    public void saveTest(long id, String code, String name, String unit, Double low, Double high,
+                         Double criticalLow, Double criticalHigh, String category) {
         session.require(Permission.MANAGE_USERS_SETTINGS);
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Test name is required");
         }
+        if (criticalLow != null && criticalHigh != null && criticalLow > criticalHigh) {
+            throw new IllegalArgumentException("Critical low must be below critical high");
+        }
         if (id <= 0) {
-            labs.insertTest(code, name, unit, low, high, category);
+            labs.insertTest(code, name, unit, low, high, criticalLow, criticalHigh, category);
         } else {
-            labs.updateTest(id, code, name, unit, low, high, category);
+            labs.updateTest(id, code, name, unit, low, high, criticalLow, criticalHigh, category);
         }
         audit.log(AuditAction.UPDATE, "lab_test", id, null, "Lab catalogue updated");
     }
@@ -106,21 +114,25 @@ public final class LabService {
         return flag;
     }
 
-    /** Auto-flags values against the catalogue reference range. */
+    /** Auto-flags values against the catalogue reference and explicit critical limits. */
     public LabFlag flagFor(LabTest test, Double value) {
-        if (value == null || test == null) {
+        if (test == null) {
             return null;
         }
-        Double low = test.refLow();
-        Double high = test.refHigh();
-        if (low != null && high != null) {
-            double span = Math.max(0.0001, high - low);
-            if (value < low - span * 0.5) {
-                return LabFlag.CRITICAL;
-            }
-            if (value > high + span * 0.5) {
-                return LabFlag.CRITICAL;
-            }
+        return flagFor(test.refLow(), test.refHigh(), test.critLow(), test.critHigh(), value);
+    }
+
+    /** Flags a value as critical only when it crosses an explicit critical limit. */
+    public static LabFlag flagFor(Double low, Double high, Double criticalLow, Double criticalHigh,
+                                  Double value) {
+        if (value == null) {
+            return null;
+        }
+        if (criticalLow != null && value < criticalLow) {
+            return LabFlag.CRITICAL;
+        }
+        if (criticalHigh != null && value > criticalHigh) {
+            return LabFlag.CRITICAL;
         }
         if (low != null && value < low) {
             return LabFlag.LOW;

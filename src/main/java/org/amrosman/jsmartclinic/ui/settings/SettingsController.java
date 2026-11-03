@@ -88,6 +88,7 @@ public class SettingsController implements ContextAware, Navigator.Refreshable {
     @FXML private TableColumn<LabTest, String> labNameColumn;
     @FXML private TableColumn<LabTest, String> labUnitColumn;
     @FXML private TableColumn<LabTest, String> labRangeColumn;
+    @FXML private TableColumn<LabTest, String> labCriticalColumn;
     @FXML private TableColumn<LabTest, String> labCategoryColumn;
     @FXML private Button deleteLabButton;
     @FXML private Button editLabButton;
@@ -182,6 +183,8 @@ public class SettingsController implements ContextAware, Navigator.Refreshable {
         labNameColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().name()));
         labUnitColumn.setCellValueFactory(data -> new SimpleStringProperty(blank(data.getValue().unit())));
         labRangeColumn.setCellValueFactory(data -> new SimpleStringProperty(range(data.getValue())));
+        labCriticalColumn.setCellValueFactory(data -> new SimpleStringProperty(
+                criticalRange(data.getValue().critLow(), data.getValue().critHigh())));
         labCategoryColumn.setCellValueFactory(data -> new SimpleStringProperty(blank(data.getValue().category())));
         labTable.setPlaceholder(Ui.emptyState("No lab tests", "Add the tests your practice offers"));
         labTable.setOnMouseClicked(event -> {
@@ -551,6 +554,8 @@ public class SettingsController implements ContextAware, Navigator.Refreshable {
         TextField unit = Forms.text("e.g. g/dL");
         TextField low = Forms.text("Low");
         TextField high = Forms.text("High");
+        TextField criticalLow = Forms.text("Critical low");
+        TextField criticalHigh = Forms.text("Critical high");
         TextField category = Forms.text("e.g. Haematology");
         if (!creating) {
             code.setText(existing.code());
@@ -558,6 +563,8 @@ public class SettingsController implements ContextAware, Navigator.Refreshable {
             unit.setText(existing.unit());
             low.setText(existing.refLow() == null ? "" : String.valueOf(existing.refLow()));
             high.setText(existing.refHigh() == null ? "" : String.valueOf(existing.refHigh()));
+            criticalLow.setText(existing.critLow() == null ? "" : String.valueOf(existing.critLow()));
+            criticalHigh.setText(existing.critHigh() == null ? "" : String.valueOf(existing.critHigh()));
             category.setText(existing.category());
         }
 
@@ -567,10 +574,12 @@ public class SettingsController implements ContextAware, Navigator.Refreshable {
         Forms.row(grid, 2, "Unit", unit);
         Forms.row(grid, 3, "Reference low", low);
         Forms.row(grid, 4, "Reference high", high);
-        Forms.row(grid, 5, "Category", category);
+        Forms.row(grid, 5, "Critical low", criticalLow);
+        Forms.row(grid, 6, "Critical high", criticalHigh);
+        Forms.row(grid, 7, "Category", category);
         Label error = Forms.errorLabel();
         Dialog<Void> dialog = Forms.dialog(creating ? "New lab test" : "Edit lab test",
-                "Reference ranges drive automatic LOW/HIGH/CRITICAL flags", Forms.stack(grid, error));
+                "Reference ranges drive LOW/HIGH flags; critical limits are opt-in", Forms.stack(grid, error));
         ButtonType saveType = new ButtonType(creating ? "Create test" : "Save test", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(saveType, ButtonType.CANCEL);
         dialog.getDialogPane().lookupButton(saveType).addEventFilter(ActionEvent.ACTION, event -> {
@@ -582,21 +591,29 @@ public class SettingsController implements ContextAware, Navigator.Refreshable {
             }
             Double lowValue;
             Double highValue;
+            Double criticalLowValue;
+            Double criticalHighValue;
             try {
                 lowValue = parseDouble(low.getText());
                 highValue = parseDouble(high.getText());
+                criticalLowValue = parseDouble(criticalLow.getText());
+                criticalHighValue = parseDouble(criticalHigh.getText());
             } catch (NumberFormatException e) {
-                Forms.showError(error, "Reference values must be numbers");
+                Forms.showError(error, "Reference and critical values must be numbers");
                 return;
             }
             if (lowValue != null && highValue != null && lowValue > highValue) {
                 Forms.showError(error, "Reference low must be below reference high");
                 return;
             }
+            if (criticalLowValue != null && criticalHighValue != null && criticalLowValue > criticalHighValue) {
+                Forms.showError(error, "Critical low must be below critical high");
+                return;
+            }
             dialog.getDialogPane().lookupButton(saveType).setDisable(true);
             Async.run(() -> {
                 context.labs().saveTest(creating ? 0 : existing.id(), text(code), text(name), text(unit),
-                        lowValue, highValue, text(category));
+                        lowValue, highValue, criticalLowValue, criticalHighValue, text(category));
                 return null;
             }, ignored -> {
                 dialog.close();
@@ -824,6 +841,16 @@ public class SettingsController implements ContextAware, Navigator.Refreshable {
             return test.refLow() + " – " + test.refHigh();
         }
         return test.refLow() != null ? "≥ " + test.refLow() : "≤ " + test.refHigh();
+    }
+
+    private static String criticalRange(Double low, Double high) {
+        if (low == null && high == null) {
+            return "—";
+        }
+        if (low != null && high != null) {
+            return "< " + low + " / > " + high;
+        }
+        return low != null ? "< " + low : "> " + high;
     }
 
     private static String entity(AuditEvent event) {

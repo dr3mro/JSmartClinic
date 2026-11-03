@@ -27,6 +27,8 @@ public final class LabRepository {
             String unit,
             Double refLow,
             Double refHigh,
+            Double critLow,
+            Double critHigh,
             Long resultId,
             Double valueNum,
             String valueText,
@@ -44,7 +46,9 @@ public final class LabRepository {
 
     private LabTest test(ResultSet rs) throws SQLException {
         return new LabTest(rs.getLong("id"), rs.getString("code"), rs.getString("name"), rs.getString("unit"),
-                Jdbc.nullableDouble(rs, "ref_low"), Jdbc.nullableDouble(rs, "ref_high"), rs.getString("category"));
+                Jdbc.nullableDouble(rs, "ref_low"), Jdbc.nullableDouble(rs, "ref_high"),
+                Jdbc.nullableDouble(rs, "crit_low"), Jdbc.nullableDouble(rs, "crit_high"),
+                rs.getString("category"));
     }
 
     public List<LabTest> tests() {
@@ -63,16 +67,20 @@ public final class LabRepository {
         }
     }
 
-    public long insertTest(String code, String name, String unit, Double low, Double high, String category) {
+    public long insertTest(String code, String name, String unit, Double low, Double high,
+                           Double critLow, Double critHigh, String category) {
         return Jdbc.transaction(database, c -> Jdbc.insert(c,
-                "INSERT INTO lab_tests(code, name, unit, ref_low, ref_high, category) VALUES (?,?,?,?,?,?)",
-                code, name, unit, low, high, category));
+                "INSERT INTO lab_tests(code, name, unit, ref_low, ref_high, crit_low, crit_high, category) "
+                        + "VALUES (?,?,?,?,?,?,?,?)",
+                code, name, unit, low, high, critLow, critHigh, category));
     }
 
-    public void updateTest(long id, String code, String name, String unit, Double low, Double high, String category) {
+    public void updateTest(long id, String code, String name, String unit, Double low, Double high,
+                           Double critLow, Double critHigh, String category) {
         Jdbc.transaction(database, c -> Jdbc.update(c,
-                "UPDATE lab_tests SET code=?, name=?, unit=?, ref_low=?, ref_high=?, category=? WHERE id=?",
-                code, name, unit, low, high, category, id));
+                "UPDATE lab_tests SET code=?, name=?, unit=?, ref_low=?, ref_high=?, crit_low=?, crit_high=?, "
+                        + "category=? WHERE id=?",
+                code, name, unit, low, high, critLow, critHigh, category, id));
     }
 
     public void deleteTest(long id) {
@@ -86,14 +94,16 @@ public final class LabRepository {
                 rs.getLong("ordered_by"), Jdbc.instant(rs, "ordered_at"),
                 LabOrderStatus.from(rs.getString("order_status")), rs.getLong("test_id"), rs.getString("test_code"),
                 rs.getString("test_name"), rs.getString("unit"), Jdbc.nullableDouble(rs, "ref_low"),
-                Jdbc.nullableDouble(rs, "ref_high"), Jdbc.nullableLong(rs, "result_id"),
+                Jdbc.nullableDouble(rs, "ref_high"), Jdbc.nullableDouble(rs, "crit_low"),
+                Jdbc.nullableDouble(rs, "crit_high"), Jdbc.nullableLong(rs, "result_id"),
                 Jdbc.nullableDouble(rs, "value_num"), rs.getString("value_text"),
                 LabFlag.from(rs.getString("flag")), Jdbc.instant(rs, "resulted_at"));
     }
 
     private static final String ROW_SQL = "SELECT o.id AS order_id, o.patient_id, o.encounter_id, o.ordered_by, "
             + "o.ordered_at, o.status AS order_status, t.id AS test_id, t.code AS test_code, t.name AS test_name, "
-            + "t.unit, t.ref_low, t.ref_high, r.id AS result_id, r.value_num, r.value_text, r.flag, r.resulted_at "
+            + "t.unit, t.ref_low, t.ref_high, t.crit_low, t.crit_high, r.id AS result_id, r.value_num, "
+            + "r.value_text, r.flag, r.resulted_at "
             + "FROM lab_orders o JOIN lab_results r ON r.lab_order_id = o.id "
             + "JOIN lab_tests t ON t.id = r.lab_test_id ";
 

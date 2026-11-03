@@ -34,7 +34,7 @@ class FoundationTest {
         new MigrationRunner(database).migrate();
 
         try (Connection connection = database.getConnection()) {
-            assertThat(Jdbc.count(connection, "SELECT COUNT(*) FROM schema_version")).isEqualTo(6);
+            assertThat(Jdbc.count(connection, "SELECT COUNT(*) FROM schema_version")).isEqualTo(7);
             assertThat(Jdbc.count(connection, "SELECT COUNT(*) FROM lab_tests")).isEqualTo(17);
             assertThat(Jdbc.count(connection, "SELECT COUNT(*) FROM services")).isEqualTo(8);
             assertThat(Jdbc.count(connection, "SELECT COUNT(*) FROM users")).isZero();

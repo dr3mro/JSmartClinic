@@ -10,6 +10,7 @@ import javafx.scene.layout.GridPane;
 import org.amrosman.jsmartclinic.app.AppContext;
 import org.amrosman.jsmartclinic.domain.LabFlag;
 import org.amrosman.jsmartclinic.repository.LabRepository;
+import org.amrosman.jsmartclinic.service.LabService;
 import org.amrosman.jsmartclinic.ui.components.Async;
 import org.amrosman.jsmartclinic.ui.components.Forms;
 
@@ -40,7 +41,8 @@ public final class LabResultDialog {
         Runnable preview = () -> {
             try {
                 Double numeric = Forms.doubleOrNull(value.getText());
-                LabFlag flag = calculateFlag(row.refLow(), row.refHigh(), numeric);
+                LabFlag flag = LabService.flagFor(row.refLow(), row.refHigh(), row.critLow(),
+                        row.critHigh(), numeric);
                 flagLabel.setText(flag == null ? (text.getText().isBlank() ? "Not resulted" : "TEXT") : flag.name());
                 flagLabel.getStyleClass().setAll("badge",
                         "badge-" + (flag == null ? "draft" : flag.name().toLowerCase(java.util.Locale.ROOT)));
@@ -92,25 +94,6 @@ public final class LabResultDialog {
             }
         });
         dialog.showAndWait();
-    }
-
-    public static LabFlag calculateFlag(Double low, Double high, Double value) {
-        if (value == null) {
-            return null;
-        }
-        if (low != null && high != null) {
-            double span = Math.max(0.0001, high - low);
-            if (value < low - span * 0.5 || value > high + span * 0.5) {
-                return LabFlag.CRITICAL;
-            }
-        }
-        if (low != null && value < low) {
-            return LabFlag.LOW;
-        }
-        if (high != null && value > high) {
-            return LabFlag.HIGH;
-        }
-        return LabFlag.NORMAL;
     }
 
     public static String reference(LabRepository.LabRow row) {

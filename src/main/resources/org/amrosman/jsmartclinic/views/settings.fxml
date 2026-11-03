@@ -154,6 +154,7 @@
                                     <TableColumn fx:id="labNameColumn" text="Test" prefWidth="240"/>
                                     <TableColumn fx:id="labUnitColumn" text="Unit" prefWidth="90"/>
                                     <TableColumn fx:id="labRangeColumn" text="Reference range" prefWidth="160"/>
+                                    <TableColumn fx:id="labCriticalColumn" text="Critical range" prefWidth="160"/>
                                     <TableColumn fx:id="labCategoryColumn" text="Category" prefWidth="140"/>
                                 </columns>
                             </TableView>

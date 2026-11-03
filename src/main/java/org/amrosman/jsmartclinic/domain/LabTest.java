@@ -7,5 +7,7 @@ public record LabTest(
         String unit,
         Double refLow,
         Double refHigh,
+        Double critLow,
+        Double critHigh,
         String category) {
 }
