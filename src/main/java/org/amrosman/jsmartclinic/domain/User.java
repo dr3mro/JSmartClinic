@@ -6,6 +6,7 @@ public record User(
         String fullName,
         String passwordHash,
         Role role,
+        boolean clinician,
         String specialty,
         boolean active,
         int failedLogins,

@@ -42,6 +42,8 @@
         <Button fx:id="newButton" text="+  New appointment" onAction="#onNew" styleClass="primary-button"/>
     </HBox>
 
+    <Label fx:id="permissionHint" styleClass="muted" wrapText="true" managed="false" visible="false"/>
+
     <HBox spacing="14" VBox.vgrow="ALWAYS">
         <VBox styleClass="card" spacing="10" HBox.hgrow="ALWAYS">
             <HBox styleClass="card-header" spacing="10">

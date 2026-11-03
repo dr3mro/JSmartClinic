@@ -350,6 +350,7 @@ public class SettingsController implements ContextAware, Navigator.Refreshable {
         TextField fullName = Forms.text("Full name");
         ComboBox<Role> role = roleCombo();
         TextField specialty = Forms.text("Specialty (optional)");
+        CheckBox clinician = new CheckBox("I also see patients (doctor)");
         CheckBox active = new CheckBox("Active account");
         active.setSelected(true);
         PasswordField password = new PasswordField();
@@ -365,6 +366,7 @@ public class SettingsController implements ContextAware, Navigator.Refreshable {
             fullName.setText(existing.fullName());
             role.setValue(existing.role());
             specialty.setText(existing.specialty());
+            clinician.setSelected(existing.clinician());
             active.setSelected(existing.active());
         } else {
             role.setValue(Role.RECEPTION);
@@ -376,6 +378,7 @@ public class SettingsController implements ContextAware, Navigator.Refreshable {
         Forms.row(grid, row++, "Full name", fullName);
         Forms.row(grid, row++, "Role", role);
         Forms.row(grid, row++, "Specialty", specialty);
+        Forms.row(grid, row++, "Clinical access", clinician);
         if (creating) {
             Forms.row(grid, row++, "Password", password);
             Forms.row(grid, row++, "Confirm", confirm);
@@ -422,9 +425,11 @@ public class SettingsController implements ContextAware, Navigator.Refreshable {
             dialog.getDialogPane().lookupButton(saveType).setDisable(true);
             Async.run(() -> {
                 if (creating) {
-                    context.users().create(userName, name, role.getValue(), text(specialty), password.getText());
+                    context.users().create(userName, name, role.getValue(), text(specialty), password.getText(),
+                            clinician.isSelected());
                 } else {
-                    context.users().update(existing.id(), name, role.getValue(), text(specialty), active.isSelected());
+                    context.users().update(existing.id(), name, role.getValue(), text(specialty), active.isSelected(),
+                            clinician.isSelected());
                 }
                 return null;
             }, ignored -> {

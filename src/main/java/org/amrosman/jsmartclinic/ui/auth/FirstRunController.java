@@ -2,6 +2,7 @@ package org.amrosman.jsmartclinic.ui.auth;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
@@ -19,15 +20,18 @@ public class FirstRunController implements ContextAware {
     @FXML private Label subtitleLabel;
     @FXML private Label clinicLabel;
     @FXML private Label fullNameLabel;
+    @FXML private Label specialtyLabel;
     @FXML private Label usernameLabel;
     @FXML private Label passwordLabel;
     @FXML private Label confirmLabel;
     @FXML private Label errorLabel;
     @FXML private TextField clinicField;
     @FXML private TextField fullNameField;
+    @FXML private TextField specialtyField;
     @FXML private TextField usernameField;
     @FXML private PasswordField passwordField;
     @FXML private PasswordField confirmField;
+    @FXML private CheckBox clinicianCheck;
     @FXML private Button createButton;
 
     private AppContext context;
@@ -49,6 +53,8 @@ public class FirstRunController implements ContextAware {
         subtitleLabel.setText(I18n.t("firstrun.subtitle"));
         clinicLabel.setText(I18n.t("firstrun.clinic"));
         fullNameLabel.setText(I18n.t("firstrun.fullName"));
+        specialtyLabel.setText(I18n.t("firstrun.specialty"));
+        clinicianCheck.setText(I18n.t("firstrun.clinician"));
         usernameLabel.setText(I18n.t("firstrun.username"));
         passwordLabel.setText(I18n.t("firstrun.password"));
         confirmLabel.setText(I18n.t("firstrun.confirm"));
@@ -75,7 +81,7 @@ public class FirstRunController implements ContextAware {
         }
         try {
             User admin = context.auth().createFirstAdministrator(clinicField.getText(), fullNameField.getText(),
-                    usernameField.getText(), password);
+                    usernameField.getText(), password, clinicianCheck.isSelected(), specialtyField.getText());
             onCreated.accept(admin);
         } catch (RuntimeException e) {
             showError(e.getMessage());

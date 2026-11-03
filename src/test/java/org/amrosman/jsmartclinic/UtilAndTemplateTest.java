@@ -150,10 +150,10 @@ class UtilAndTemplateTest {
         assertThat(service.defaultFor("Unknown specialty").orElseThrow().id()).isEqualTo("general");
         assertThat(service.specialtyForUser(null)).isEqualTo("General");
 
-        User noSpecialty = new User(1, "u", "User", "hash", Role.DOCTOR, null, true, 0,
+        User noSpecialty = new User(1, "u", "User", "hash", Role.DOCTOR, false, null, true, 0,
                 null, null, Instant.now(), Instant.now());
         assertThat(service.specialtyForUser(noSpecialty)).isEqualTo("General");
-        User cardiologist = new User(1, "u", "User", "hash", Role.DOCTOR, "Cardiology", true, 0,
+        User cardiologist = new User(1, "u", "User", "hash", Role.DOCTOR, false, "Cardiology", true, 0,
                 null, null, Instant.now(), Instant.now());
         assertThat(service.specialtyForUser(cardiologist)).isEqualTo("Cardiology");
 

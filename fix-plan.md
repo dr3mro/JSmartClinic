@@ -15,13 +15,13 @@ Severity: 🔴 Critical (data loss, safety, or security) · 🟠 High (feature b
 ---
 
 ## Step 0 — Safety net
-- [ ] **S-0** The project is **not a git repository** (there is no `.git`). Run `git init`. Add `.DS_Store`, `.idea/workspace.xml`, `*.bak` and `backup/` to `.gitignore`. Delete the stray `.DS_Store` files. Make a baseline commit **before** you change anything else.
+- [x] **S-0** The project is **not a git repository** (there is no `.git`). Run `git init`. Add `.DS_Store`, `.idea/workspace.xml`, `*.bak` and `backup/` to `.gitignore`. Delete the stray `.DS_Store` files. Make a baseline commit **before** you change anything else.
 
 ---
 
 ## Batch 1 — Clinical record integrity 🔴
 
-- [ ] **C-00 🔴 Encounters can't be created with the first-run account** — `service/Permission.java`, `FirstRunController`, `EncountersController:87`, `PatientChartController:290`, `AppointmentsController:147`
+- [x] **C-00 🔴 Encounters can't be created with the first-run account** — `service/Permission.java`, `FirstRunController`, `EncountersController:87`, `PatientChartController:290`, `AppointmentsController:147`
   - *Problem:* The first-run wizard creates the only account as `ADMIN`. `ADMIN` has no `ENCOUNTERS` (or `PRESCRIBE`) permission, so every "New encounter" and "Start encounter" button is hidden. A solo clinic owner can't write a single note.
   - *Fix:* Add a `clinician` flag to users (`V003`: `ALTER TABLE users ADD COLUMN clinician INTEGER NOT NULL DEFAULT 0`), and add a checkbox labelled "I also see patients (doctor)", plus a specialty field, to the first-run wizard and to the user editor in Settings. `Session.can()` should grant the DOCTOR permissions (`ENCOUNTERS`, `PRESCRIBE`, `LABS`, `VITALS`) when `role==ADMIN && clinician`. `UserRepository.findProviders()` must include clinician admins so they show up as appointment providers. When a button is hidden for permission reasons, show a hint explaining why rather than making it vanish silently.
   - *Tests:* A first-run admin with `clinician=true` can `start()`, `save()` and `sign()` an encounter. A plain admin still gets `AccessDeniedException`.
@@ -245,4 +245,5 @@ Severity: 🔴 Critical (data loss, safety, or security) · 🟠 High (feature b
 ## Fix Log
 | Date | ID | Commit | Notes |
 |---|---|---|---|
-| | | | |
+| 2026-11-03 | S-0 | 7be2cdb | Initialised git, updated `.gitignore`, removed stray `.DS_Store` files, baseline commit. |
+| 2026-11-03 | C-00 | a58f4ae | Added `users.clinician` (V003), clinician-admin permissions, first-run/settings controls, provider lookup, and permission hints. New `ClinicianAdminTest`. |

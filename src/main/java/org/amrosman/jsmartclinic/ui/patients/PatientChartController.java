@@ -68,6 +68,7 @@ public class PatientChartController implements ContextAware, Navigator.ParamAwar
     @javafx.fxml.FXML private ImageView photoView;
     @javafx.fxml.FXML private Label patientName;
     @javafx.fxml.FXML private Label patientMeta;
+    @javafx.fxml.FXML private Label permissionHint;
     @javafx.fxml.FXML private Label allergyBanner;
     @javafx.fxml.FXML private Button editButton;
     @javafx.fxml.FXML private Button encounterButton;
@@ -285,18 +286,29 @@ public class PatientChartController implements ContextAware, Navigator.ParamAwar
     }
 
     private void applyPermissions() {
-        editButton.setVisible(context.session().can(Permission.PATIENT_EDIT));
-        editButton.setManaged(editButton.isVisible());
-        encounterButton.setVisible(context.session().can(Permission.ENCOUNTERS));
-        encounterButton.setManaged(encounterButton.isVisible());
-        prescriptionButton.setVisible(context.session().can(Permission.PRESCRIBE));
-        prescriptionButton.setManaged(prescriptionButton.isVisible());
-        labButton.setVisible(context.session().can(Permission.LABS));
-        labButton.setManaged(labButton.isVisible());
-        invoiceButton.setVisible(context.session().can(Permission.BILLING));
-        invoiceButton.setManaged(invoiceButton.isVisible());
-        billingBalance.setVisible(context.session().can(Permission.BILLING));
-        billingBalance.setManaged(billingBalance.isVisible());
+        boolean canEdit = context.session().can(Permission.PATIENT_EDIT);
+        boolean canEncounter = context.session().can(Permission.ENCOUNTERS);
+        boolean canPrescribe = context.session().can(Permission.PRESCRIBE);
+        boolean canLab = context.session().can(Permission.LABS);
+        boolean canBill = context.session().can(Permission.BILLING);
+        editButton.setVisible(canEdit);
+        editButton.setManaged(canEdit);
+        encounterButton.setVisible(canEncounter);
+        encounterButton.setManaged(canEncounter);
+        prescriptionButton.setVisible(canPrescribe);
+        prescriptionButton.setManaged(canPrescribe);
+        labButton.setVisible(canLab);
+        labButton.setManaged(canLab);
+        invoiceButton.setVisible(canBill);
+        invoiceButton.setManaged(canBill);
+        billingBalance.setVisible(canBill);
+        billingBalance.setManaged(canBill);
+        boolean restricted = !canEdit || !canEncounter || !canPrescribe || !canLab || !canBill;
+        permissionHint.setText(restricted
+                ? "Some actions are hidden because your role does not allow them."
+                : "");
+        permissionHint.setVisible(restricted);
+        permissionHint.setManaged(restricted);
     }
 
     @Override

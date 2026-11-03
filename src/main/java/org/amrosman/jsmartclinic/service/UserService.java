@@ -40,6 +40,11 @@ public final class UserService {
     }
 
     public User create(String username, String fullName, Role role, String specialty, String password) {
+        return create(username, fullName, role, specialty, password, false);
+    }
+
+    public User create(String username, String fullName, Role role, String specialty, String password,
+                       boolean clinician) {
         session.require(Permission.MANAGE_USERS_SETTINGS);
         String cleanUser = Validators.required(username, "Username");
         String cleanName = Validators.required(fullName, "Full name");
@@ -47,12 +52,17 @@ public final class UserService {
         if (users.findByUsername(cleanUser) != null) {
             throw new IllegalArgumentException("Username already exists");
         }
-        long id = users.insert(cleanUser, cleanName, PasswordHasher.hash(password), role, specialty);
+        boolean clinicalAdmin = clinician && role == Role.ADMIN;
+        long id = users.insert(cleanUser, cleanName, PasswordHasher.hash(password), role, specialty, clinicalAdmin);
         audit.log(AuditAction.CREATE, "user", id, null, "User " + cleanUser + " created");
         return users.findById(id);
     }
 
     public void update(long id, String fullName, Role role, String specialty, boolean active) {
+        update(id, fullName, role, specialty, active, false);
+    }
+
+    public void update(long id, String fullName, Role role, String specialty, boolean active, boolean clinician) {
         session.require(Permission.MANAGE_USERS_SETTINGS);
         User existing = users.findById(id);
         if (existing == null) {
@@ -61,10 +71,14 @@ public final class UserService {
         if (existing.id() == session.userId() && !active) {
             throw new IllegalArgumentException("You cannot deactivate your own account");
         }
+        boolean clinicalAdmin = clinician && role == Role.ADMIN;
         User updated = new User(existing.id(), existing.username(), Validators.required(fullName, "Full name"),
-                existing.passwordHash(), role, specialty, active, existing.failedLogins(), existing.lockedUntil(),
-                existing.lastLoginAt(), existing.createdAt(), existing.updatedAt());
+                existing.passwordHash(), role, clinicalAdmin, specialty, active, existing.failedLogins(),
+                existing.lockedUntil(), existing.lastLoginAt(), existing.createdAt(), existing.updatedAt());
         users.update(updated);
+        if (existing.id() == session.userId()) {
+            session.login(updated);
+        }
         audit.log(AuditAction.UPDATE, "user", id, null, "User updated");
     }
 

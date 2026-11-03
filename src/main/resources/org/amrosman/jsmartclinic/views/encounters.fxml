@@ -28,6 +28,8 @@
         <Button fx:id="newButton" text="+  New encounter" onAction="#onNew" styleClass="primary-button"/>
     </HBox>
 
+    <Label fx:id="permissionHint" styleClass="muted" wrapText="true" managed="false" visible="false"/>
+
     <VBox styleClass="card" spacing="10" VBox.vgrow="ALWAYS">
         <HBox styleClass="card-header" spacing="10">
             <Label text="Clinical encounters" styleClass="card-title"/>

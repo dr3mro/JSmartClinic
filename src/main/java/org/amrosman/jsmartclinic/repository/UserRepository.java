@@ -11,7 +11,7 @@ import java.util.List;
 
 public final class UserRepository {
 
-    private static final String COLUMNS = "id, username, full_name, password_hash, role, specialty, active, "
+    private static final String COLUMNS = "id, username, full_name, password_hash, role, clinician, specialty, active, "
             + "failed_logins, locked_until, last_login_at, created_at, updated_at";
 
     private final Database database;
@@ -27,6 +27,7 @@ public final class UserRepository {
                 rs.getString("full_name"),
                 rs.getString("password_hash"),
                 Role.from(rs.getString("role")),
+                rs.getInt("clinician") == 1,
                 rs.getString("specialty"),
                 rs.getInt("active") == 1,
                 rs.getInt("failed_logins"),
@@ -55,7 +56,8 @@ public final class UserRepository {
     public List<User> findProviders() {
         try (Connection c = database.getConnection()) {
             return Jdbc.list(c,
-                    "SELECT " + COLUMNS + " FROM users WHERE active = 1 AND role IN ('DOCTOR','NURSE') ORDER BY full_name",
+                    "SELECT " + COLUMNS + " FROM users WHERE active = 1 AND (role IN ('DOCTOR','NURSE') "
+                            + "OR (role = 'ADMIN' AND clinician = 1)) ORDER BY full_name",
                     this::map);
         } catch (SQLException e) {
             throw new IllegalStateException(e);
@@ -79,20 +81,22 @@ public final class UserRepository {
         }
     }
 
-    public long insert(String username, String fullName, String passwordHash, Role role, String specialty) {
+    public long insert(String username, String fullName, String passwordHash, Role role, String specialty,
+                       boolean clinician) {
         return Jdbc.transaction(database, c -> {
             Instant now = Instant.now();
             return Jdbc.insert(c,
-                    "INSERT INTO users(username, full_name, password_hash, role, specialty, active, failed_logins, "
-                            + "created_at, updated_at) VALUES (?,?,?,?,?,1,0,?,?)",
-                    username, fullName, passwordHash, role.name(), specialty, now, now);
+                    "INSERT INTO users(username, full_name, password_hash, role, clinician, specialty, active, "
+                            + "failed_logins, created_at, updated_at) VALUES (?,?,?,?,?,?,1,0,?,?)",
+                    username, fullName, passwordHash, role.name(), clinician, specialty, now, now);
         });
     }
 
     public void update(User user) {
         Jdbc.transaction(database, c -> Jdbc.update(c,
-                "UPDATE users SET full_name=?, role=?, specialty=?, active=?, updated_at=? WHERE id=?",
-                user.fullName(), user.role().name(), user.specialty(), user.active(), Instant.now(), user.id()));
+                "UPDATE users SET full_name=?, role=?, clinician=?, specialty=?, active=?, updated_at=? WHERE id=?",
+                user.fullName(), user.role().name(), user.clinician(), user.specialty(), user.active(),
+                Instant.now(), user.id()));
     }
 
     public void setPassword(long id, String hash) {

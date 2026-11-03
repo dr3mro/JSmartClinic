@@ -35,13 +35,20 @@ public final class AuthService {
     }
 
     public User createFirstAdministrator(String clinicName, String fullName, String username, String password) {
+        return createFirstAdministrator(clinicName, fullName, username, password, false, null);
+    }
+
+    public User createFirstAdministrator(String clinicName, String fullName, String username, String password,
+                                         boolean clinician, String specialty) {
         if (!firstRun()) {
             throw new IllegalStateException("An administrator already exists");
         }
         String cleanUser = Validators.required(username, "Username");
         String cleanName = Validators.required(fullName, "Full name");
+        String cleanSpecialty = specialty == null || specialty.isBlank() ? null : specialty.trim();
         PasswordHasher.validatePolicy(password);
-        long id = users.insert(cleanUser, cleanName, PasswordHasher.hash(password), Role.ADMIN, null);
+        long id = users.insert(cleanUser, cleanName, PasswordHasher.hash(password), Role.ADMIN,
+                cleanSpecialty, clinician);
         if (clinicName != null && !clinicName.isBlank()) {
             settings.put("clinic_name", clinicName.trim());
         }

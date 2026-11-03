@@ -35,6 +35,7 @@ public class EncountersController implements ContextAware, Navigator.Refreshable
     @FXML private ComboBox<String> statusFilter;
     @FXML private Label countLabel;
     @FXML private Label draftLabel;
+    @FXML private Label permissionHint;
     @FXML private TableView<EncounterRow> encounterTable;
     @FXML private TableColumn<EncounterRow, String> dateColumn;
     @FXML private TableColumn<EncounterRow, String> patientColumn;
@@ -87,6 +88,10 @@ public class EncountersController implements ContextAware, Navigator.Refreshable
         boolean canWrite = context.session().can(Permission.ENCOUNTERS);
         newButton.setVisible(canWrite);
         newButton.setManaged(canWrite);
+        permissionHint.setText(canWrite ? "" : "Your role cannot create encounters. "
+                + "An administrator can enable \"I also see patients\" on an admin account.");
+        permissionHint.setVisible(!canWrite);
+        permissionHint.setManaged(!canWrite);
         openButton.setDisable(true);
         load();
     }

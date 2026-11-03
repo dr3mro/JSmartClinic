@@ -50,6 +50,7 @@ public class AppointmentsController implements ContextAware, Navigator.Refreshab
     @FXML private ToggleGroup viewGroup;
     @FXML private Label selectedLabel;
     @FXML private Label calendarTitle;
+    @FXML private Label permissionHint;
     @FXML private GridPane calendarGrid;
     @FXML private Label waitingCount;
     @FXML private TableView<SchedulingService.ScheduleEntry> waitingTable;
@@ -147,6 +148,12 @@ public class AppointmentsController implements ContextAware, Navigator.Refreshab
         boolean canEncounter = context.session().can(Permission.ENCOUNTERS);
         encounterButton.setVisible(canEncounter);
         encounterButton.setManaged(canEncounter);
+        boolean restricted = !canSchedule || !canChart || !canEncounter;
+        permissionHint.setText(restricted
+                ? "Some scheduling and clinical actions are hidden because your role does not allow them."
+                : "");
+        permissionHint.setVisible(restricted);
+        permissionHint.setManaged(restricted);
         updateButtons();
     }
 

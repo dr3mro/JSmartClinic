@@ -40,6 +40,7 @@
                 <Button fx:id="labButton" text="Order labs" onAction="#onOrderLabs" styleClass="secondary-button"/>
                 <Button fx:id="invoiceButton" text="New invoice" onAction="#onNewInvoice" styleClass="secondary-button"/>
             </HBox>
+            <Label fx:id="permissionHint" styleClass="muted" wrapText="true" managed="false" visible="false"/>
         </VBox>
     </HBox>
 
