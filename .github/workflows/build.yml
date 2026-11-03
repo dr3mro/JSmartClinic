@@ -150,6 +150,13 @@ jobs:
         run: |
           git clone --depth 1 --branch "$JFX_REF" "https://github.com/$JFX_REPO.git" jfx
           cd jfx
+          # OpenJFX's win.gradle needs VSCOMNTOOLS = <VS install>\VC\Auxiliary\Build
+          VSWHERE="/c/Program Files (x86)/Microsoft Visual Studio/Installer/vswhere.exe"
+          VS_PATH=$("$VSWHERE" -latest -products '*' -requires Microsoft.VisualStudio.Component.VC.Tools.ARM64 -property installationPath)
+          if [ -z "$VS_PATH" ]; then VS_PATH=$("$VSWHERE" -latest -products '*' -property installationPath); fi
+          echo "Visual Studio: $VS_PATH"
+          export VSCOMNTOOLS="$VS_PATH\VC\Auxiliary\Build"
+          ls "$(cygpath -u "$VSCOMNTOOLS" 2>/dev/null || echo "$VSCOMNTOOLS")" | head
           export JAVA_HOME="${{ steps.jdk23.outputs.path }}"
           "$JAVA_HOME/bin/java" -version
           ./gradlew.bat --no-daemon sdk jmods
