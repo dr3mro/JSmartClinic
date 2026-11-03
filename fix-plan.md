@@ -250,4 +250,4 @@ Severity: 🔴 Critical (data loss, safety, or security) · 🟠 High (feature b
 | 2026-11-03 | C-01 | 7f2b086 | Added `encounters.amends_encounter_id` (V004); addenda start as editable drafts, `signed()` uses `signed_at`, signing links and locks both notes. Updated encounter tests and UI links. |
 | 2026-11-03 | C-02 | c9f3f45 | Replaced the signed-encounter trigger (V005): signed content and metadata are immutable, only `SIGNED -> AMENDED` is allowed, and signed rows cannot be deleted. Extended JDBC trigger tests. |
 | 2026-11-03 | C-03 | 52feecb | Diagnosis and vital writes now load the stored row, reject signed encounters, derive the audit patient from the database, and are guarded by new triggers (V006). |
-| 2026-11-03 | C-04 | pending | Signing now uses `isBlank()` and requires a chief complaint or a non-blank assessment/plan. Added an empty/whitespace signing test. |
+| 2026-11-03 | C-04 | 040972f | Signing now uses `isBlank()` and requires a chief complaint or a non-blank assessment/plan. Added an empty/whitespace signing test. |
