@@ -1,0 +1,43 @@
+{
+  "id": "pediatrics",
+  "name": "Pediatrics",
+  "specialty": "Pediatrics",
+  "sections": [
+    {
+      "title": "Birth & development",
+      "fields": [
+        {"key": "birth_history", "label": "Birth history", "type": "textarea"},
+        {"key": "gestational_age", "label": "Gestational age (weeks)", "type": "number", "min": 20, "max": 45, "unit": "wks"},
+        {"key": "feeding", "label": "Feeding", "type": "select", "options": ["Breast", "Formula", "Mixed", "Solids"]},
+        {"key": "milestones", "label": "Developmental milestones", "type": "textarea"},
+        {"key": "school", "label": "School performance", "type": "text"}
+      ]
+    },
+    {
+      "title": "Immunisation",
+      "fields": [
+        {"key": "immunisations_up_to_date", "label": "Immunisations up to date", "type": "checkbox"},
+        {"key": "immunisation_notes", "label": "Immunisation notes", "type": "textarea"},
+        {"key": "allergies_reviewed", "label": "Allergies reviewed", "type": "checkbox"}
+      ]
+    },
+    {
+      "title": "Examination",
+      "fields": [
+        {"key": "growth_percentile", "label": "Weight / height percentile", "type": "text"},
+        {"key": "head_circumference", "label": "Head circumference (cm)", "type": "number", "min": 20, "max": 65, "unit": "cm"},
+        {"key": "ent_exam", "label": "ENT", "type": "text"},
+        {"key": "chest_exam", "label": "Chest", "type": "text"},
+        {"key": "abdomen_exam", "label": "Abdomen", "type": "text"},
+        {"key": "skin_exam", "label": "Skin", "type": "text"}
+      ]
+    },
+    {
+      "title": "Plan",
+      "fields": [
+        {"key": "parent_advice", "label": "Parent advice", "type": "textarea"},
+        {"key": "next_visit", "label": "Next visit", "type": "date"}
+      ]
+    }
+  ]
+}

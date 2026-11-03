@@ -1,0 +1,46 @@
+{
+  "id": "ophthalmology",
+  "name": "Ophthalmology",
+  "specialty": "Ophthalmology",
+  "sections": [
+    {
+      "title": "Visual acuity",
+      "fields": [
+        {"key": "va_right", "label": "Right eye acuity", "type": "text", "placeholder": "6/6"},
+        {"key": "va_left", "label": "Left eye acuity", "type": "text", "placeholder": "6/6"},
+        {"key": "va_corrected", "label": "With correction", "type": "checkbox"},
+        {"key": "pinhole_right", "label": "Pinhole right", "type": "text"},
+        {"key": "pinhole_left", "label": "Pinhole left", "type": "text"}
+      ]
+    },
+    {
+      "title": "Eye examination",
+      "fields": [
+        {"key": "pupils", "label": "Pupils", "type": "text"},
+        {"key": "eye_movements", "label": "Eye movements", "type": "text"},
+        {"key": "conjunctiva", "label": "Conjunctiva", "type": "text"},
+        {"key": "cornea", "label": "Cornea", "type": "text"},
+        {"key": "anterior_chamber", "label": "Anterior chamber", "type": "text"},
+        {"key": "fundoscopy_right", "label": "Fundoscopy right", "type": "textarea"},
+        {"key": "fundoscopy_left", "label": "Fundoscopy left", "type": "textarea"}
+      ]
+    },
+    {
+      "title": "Measurements",
+      "fields": [
+        {"key": "iop_right", "label": "IOP right (mmHg)", "type": "number", "min": 0, "max": 80, "unit": "mmHg"},
+        {"key": "iop_left", "label": "IOP left (mmHg)", "type": "number", "min": 0, "max": 80, "unit": "mmHg"},
+        {"key": "cup_disc", "label": "Cup:disc ratio", "type": "text"}
+      ]
+    },
+    {
+      "title": "Plan",
+      "fields": [
+        {"key": "drops", "label": "Eye drops", "type": "textarea"},
+        {"key": "glasses", "label": "Glasses prescription", "type": "text"},
+        {"key": "procedure", "label": "Procedure planned", "type": "text"},
+        {"key": "review", "label": "Review date", "type": "date"}
+      ]
+    }
+  ]
+}

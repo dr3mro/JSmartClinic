@@ -1,0 +1,47 @@
+{
+  "id": "dermatology",
+  "name": "Dermatology",
+  "specialty": "Dermatology",
+  "sections": [
+    {
+      "title": "Lesion description",
+      "fields": [
+        {"key": "site", "label": "Site / distribution", "type": "text"},
+        {"key": "morphology", "label": "Morphology", "type": "select", "options": ["Macule", "Papule", "Plaque", "Vesicle", "Bulla", "Pustule", "Nodule", "Patch", "Wheal", "Ulcer"]},
+        {"key": "colour", "label": "Colour", "type": "text"},
+        {"key": "size", "label": "Size (mm)", "type": "number", "min": 0, "max": 500, "unit": "mm"},
+        {"key": "border", "label": "Border", "type": "select", "options": ["Well defined", "Ill defined", "Irregular"]},
+        {"key": "surface", "label": "Surface", "type": "text"},
+        {"key": "symptoms", "label": "Symptoms", "type": "select", "options": ["Asymptomatic", "Itchy", "Painful", "Burning"]}
+      ]
+    },
+    {
+      "title": "History",
+      "fields": [
+        {"key": "onset", "label": "Onset", "type": "date"},
+        {"key": "progression", "label": "Progression", "type": "textarea"},
+        {"key": "triggers", "label": "Triggers", "type": "textarea"},
+        {"key": "previous_treatments", "label": "Previous treatments", "type": "textarea"},
+        {"key": "family_skin", "label": "Family history of skin disease", "type": "checkbox"}
+      ]
+    },
+    {
+      "title": "Examination",
+      "fields": [
+        {"key": "dermoscopy", "label": "Dermoscopy", "type": "textarea"},
+        {"key": "nails", "label": "Nails", "type": "text"},
+        {"key": "mucosa", "label": "Mucous membranes", "type": "text"},
+        {"key": "lymph_nodes", "label": "Lymph nodes", "type": "text"}
+      ]
+    },
+    {
+      "title": "Plan",
+      "fields": [
+        {"key": "topical", "label": "Topical treatment", "type": "textarea"},
+        {"key": "systemic", "label": "Systemic treatment", "type": "textarea"},
+        {"key": "biopsy", "label": "Biopsy planned", "type": "checkbox"},
+        {"key": "photoprotection", "label": "Photoprotection advice", "type": "checkbox"}
+      ]
+    }
+  ]
+}

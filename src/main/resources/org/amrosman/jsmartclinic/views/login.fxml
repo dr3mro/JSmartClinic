@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+           fx:controller="org.amrosman.jsmartclinic.ui.auth.LoginController"
+           styleClass="auth-root" stylesheets="@../app.css">
+
+    <VBox styleClass="auth-card" maxWidth="430" spacing="14">
+        <HBox styleClass="brand-box, auth-brand" spacing="2">
+            <Label text="JSmart" styleClass="brand"/>
+            <Label text="Clinic" styleClass="brand, brand-accent"/>
+        </HBox>
+        <Label fx:id="titleLabel" text="Welcome back" styleClass="auth-title"/>
+        <Label fx:id="subtitleLabel" text="Sign in to continue to your clinic workspace"
+               styleClass="auth-subtitle" wrapText="true"/>
+
+        <Label fx:id="clinicNameLabel" styleClass="clinic-pill"/>
+
+        <VBox spacing="6">
+            <Label fx:id="usernameLabel" text="Username" styleClass="form-label"/>
+            <TextField fx:id="usernameField" promptText="e.g. admin" styleClass="form-field"/>
+        </VBox>
+
+        <VBox spacing="6">
+            <Label fx:id="passwordLabel" text="Password" styleClass="form-label"/>
+            <PasswordField fx:id="passwordField" promptText="••••••••••" styleClass="form-field"
+                           onAction="#onLogin"/>
+        </VBox>
+
+        <Label fx:id="errorLabel" styleClass="error-text" wrapText="true" managed="false" visible="false"/>
+
+        <Button fx:id="loginButton" text="Sign in" onAction="#onLogin" styleClass="primary-button"
+                maxWidth="Infinity"/>
+
+        <Region prefHeight="4"/>
+        <Label fx:id="footerLabel" text="Protected health information — authorised users only"
+               styleClass="muted, auth-footer" wrapText="true"/>
+
+        <padding>
+            <Insets top="42" right="42" bottom="34" left="42"/>
+        </padding>
+    </VBox>
+</StackPane>

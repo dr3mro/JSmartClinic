@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="org.amrosman.jsmartclinic.ui.labs.LabsController"
+      styleClass="page-body" spacing="14">
+    <padding>
+        <Insets top="18" right="18" bottom="18" left="18"/>
+    </padding>
+
+    <HBox styleClass="toolbar-row" spacing="10">
+        <TextField fx:id="searchField" promptText="Filter by patient or test" styleClass="search-field"/>
+        <ComboBox fx:id="statusFilter" styleClass="form-field" prefWidth="150"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Label fx:id="countLabel" styleClass="muted"/>
+        <Button text="Refresh" onAction="#onRefresh" styleClass="ghost-button"/>
+        <Button fx:id="trendButton" text="Trend" onAction="#onTrend" styleClass="secondary-button"/>
+        <Button fx:id="collectedButton" text="Mark collected" onAction="#onCollected"
+                styleClass="secondary-button"/>
+        <Button fx:id="resultButton" text="Enter result" onAction="#onResult" styleClass="secondary-button"/>
+        <Button fx:id="cancelButton" text="Cancel order" onAction="#onCancelOrder" styleClass="danger-button"/>
+        <Button fx:id="orderButton" text="+  Order labs" onAction="#onOrder" styleClass="primary-button"/>
+    </HBox>
+
+    <VBox styleClass="card" spacing="10" VBox.vgrow="ALWAYS">
+        <HBox styleClass="card-header" spacing="10">
+            <Label text="Laboratory orders and results" styleClass="card-title"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="pendingLabel" styleClass="muted"/>
+        </HBox>
+        <TableView fx:id="labTable" VBox.vgrow="ALWAYS" styleClass="small-table">
+            <columns>
+                <TableColumn fx:id="orderedColumn" text="Ordered" prefWidth="170"/>
+                <TableColumn fx:id="patientColumn" text="Patient" prefWidth="200"/>
+                <TableColumn fx:id="testColumn" text="Test" prefWidth="200"/>
+                <TableColumn fx:id="valueColumn" text="Value" prefWidth="110"/>
+                <TableColumn fx:id="unitColumn" text="Unit" prefWidth="80"/>
+                <TableColumn fx:id="referenceColumn" text="Reference" prefWidth="110"/>
+                <TableColumn fx:id="flagColumn" text="Flag" prefWidth="100"/>
+                <TableColumn fx:id="statusColumn" text="Status" prefWidth="110"/>
+            </columns>
+        </TableView>
+        <Label text="Flags are derived from the reference range on the test catalogue. Critical values are flagged for immediate review." styleClass="muted" wrapText="true"/>
+    </VBox>
+</VBox>

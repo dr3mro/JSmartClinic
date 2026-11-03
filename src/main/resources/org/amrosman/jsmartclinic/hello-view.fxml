@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="org.amrosman.jsmartclinic.HelloController"
+            styleClass="app-root" stylesheets="@app.css">
+
+    <fx:define>
+        <ToggleGroup fx:id="navGroup"/>
+    </fx:define>
+
+    <!-- ===== Sidebar ===== -->
+    <left>
+        <VBox styleClass="sidebar">
+            <HBox styleClass="brand-box">
+                <Label text="JSmart" styleClass="brand"/>
+                <Label text="Clinic" styleClass="brand, brand-accent"/>
+            </HBox>
+
+            <Label text="MAIN" styleClass="nav-section"/>
+            <ToggleButton text="⌂   Dashboard" userData="Dashboard" toggleGroup="$navGroup" selected="true" styleClass="nav-button" maxWidth="Infinity"/>
+            <ToggleButton text="◉   Patients" userData="Patients" toggleGroup="$navGroup" styleClass="nav-button" maxWidth="Infinity"/>
+            <ToggleButton text="◷   Appointments" userData="Appointments" toggleGroup="$navGroup" styleClass="nav-button" maxWidth="Infinity"/>
+            <ToggleButton text="℞   Prescriptions" userData="Prescriptions" toggleGroup="$navGroup" styleClass="nav-button" maxWidth="Infinity"/>
+            <ToggleButton text="◈   Lab Results" userData="Lab Results" toggleGroup="$navGroup" styleClass="nav-button" maxWidth="Infinity"/>
+
+            <Label text="ADMIN" styleClass="nav-section"/>
+            <ToggleButton text="▤   Billing" userData="Billing" toggleGroup="$navGroup" styleClass="nav-button" maxWidth="Infinity"/>
+            <ToggleButton text="✦   Settings" userData="Settings" toggleGroup="$navGroup" styleClass="nav-button" maxWidth="Infinity"/>
+
+            <Region VBox.vgrow="ALWAYS"/>
+
+            <HBox styleClass="user-box" spacing="10">
+                <StackPane styleClass="avatar-small">
+                    <Label text="DR" styleClass="avatar-small-text"/>
+                </StackPane>
+                <VBox>
+                    <Label text="Dr. Admin" styleClass="user-name"/>
+                    <Label text="General Practice" styleClass="user-role"/>
+                </VBox>
+            </HBox>
+        </VBox>
+    </left>
+
+    <!-- ===== Top bar ===== -->
+    <top>
+        <HBox styleClass="topbar">
+            <VBox>
+                <Label fx:id="pageTitle" text="Dashboard" styleClass="page-title"/>
+                <Label fx:id="dateLabel" styleClass="page-subtitle"/>
+            </VBox>
+            <Region HBox.hgrow="ALWAYS"/>
+            <TextField fx:id="searchField" promptText="🔍  Search patients by name or ID" styleClass="search-field"/>
+            <Button text="+  New Patient" onAction="#onNewPatient" styleClass="primary-button"/>
+        </HBox>
+    </top>
+
+    <!-- ===== Content ===== -->
+    <center>
+        <ScrollPane fitToWidth="true" styleClass="content-scroll">
+            <VBox spacing="20">
+                <padding>
+                    <Insets top="24" right="24" bottom="24" left="24"/>
+                </padding>
+
+                <!-- Stat cards -->
+                <HBox spacing="16">
+                    <HBox styleClass="card, stat-card" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+                        <StackPane styleClass="stat-icon, icon-teal"><Label text="◷" styleClass="stat-icon-text"/></StackPane>
+                        <VBox>
+                            <Label fx:id="statAppointments" styleClass="stat-value"/>
+                            <Label text="Today's Appointments" styleClass="stat-label"/>
+                        </VBox>
+                    </HBox>
+                    <HBox styleClass="card, stat-card" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+                        <StackPane styleClass="stat-icon, icon-amber"><Label text="⧖" styleClass="stat-icon-text"/></StackPane>
+                        <VBox>
+                            <Label fx:id="statWaiting" styleClass="stat-value"/>
+                            <Label text="Patients Waiting" styleClass="stat-label"/>
+                        </VBox>
+                    </HBox>
+                    <HBox styleClass="card, stat-card" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+                        <StackPane styleClass="stat-icon, icon-blue"><Label text="+" styleClass="stat-icon-text"/></StackPane>
+                        <VBox>
+                            <Label fx:id="statNew" styleClass="stat-value"/>
+                            <Label text="New This Week" styleClass="stat-label"/>
+                        </VBox>
+                    </HBox>
+                    <HBox styleClass="card, stat-card" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+                        <StackPane styleClass="stat-icon, icon-rose"><Label text="◈" styleClass="stat-icon-text"/></StackPane>
+                        <VBox>
+                            <Label fx:id="statLabs" styleClass="stat-value"/>
+                            <Label text="Pending Lab Results" styleClass="stat-label"/>
+                        </VBox>
+                    </HBox>
+                </HBox>
+
+                <!-- Patients table + summary -->
+                <HBox spacing="16">
+                    <VBox styleClass="card" spacing="12" HBox.hgrow="ALWAYS">
+                        <HBox styleClass="card-header">
+                            <Label text="Recent Patients" styleClass="card-title"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Label fx:id="patientCount" styleClass="muted"/>
+                        </HBox>
+                        <TableView fx:id="patientTable" prefHeight="400" VBox.vgrow="ALWAYS">
+                            <columns>
+                                <TableColumn fx:id="colId" text="ID" prefWidth="80"/>
+                                <TableColumn fx:id="colName" text="Name" prefWidth="180"/>
+                                <TableColumn fx:id="colAge" text="Age" prefWidth="60"/>
+                                <TableColumn fx:id="colGender" text="Gender" prefWidth="80"/>
+                                <TableColumn fx:id="colLastVisit" text="Last Visit" prefWidth="110"/>
+                                <TableColumn fx:id="colStatus" text="Status" prefWidth="110"/>
+                            </columns>
+                        </TableView>
+                    </VBox>
+
+                    <VBox styleClass="card, summary-card" spacing="14" prefWidth="330" minWidth="300">
+                        <Label text="Patient Summary" styleClass="card-title"/>
+                        <HBox spacing="12" styleClass="summary-header">
+                            <StackPane styleClass="avatar">
+                                <Label fx:id="avatarLabel" styleClass="avatar-text"/>
+                            </StackPane>
+                            <VBox spacing="2">
+                                <Label fx:id="summaryName" styleClass="summary-name"/>
+                                <Label fx:id="summaryMeta" styleClass="muted"/>
+                            </VBox>
+                        </HBox>
+
+                        <Label text="LATEST VITALS" styleClass="section-label"/>
+                        <GridPane hgap="10" vgap="10">
+                            <columnConstraints>
+                                <ColumnConstraints percentWidth="50"/>
+                                <ColumnConstraints percentWidth="50"/>
+                            </columnConstraints>
+                            <VBox styleClass="vital-tile" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                                <Label text="Blood Pressure" styleClass="vital-caption"/>
+                                <Label fx:id="bpValue" styleClass="vital-value"/>
+                            </VBox>
+                            <VBox styleClass="vital-tile" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                                <Label text="Heart Rate" styleClass="vital-caption"/>
+                                <Label fx:id="hrValue" styleClass="vital-value"/>
+                            </VBox>
+                            <VBox styleClass="vital-tile" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                                <Label text="Temperature" styleClass="vital-caption"/>
+                                <Label fx:id="tempValue" styleClass="vital-value"/>
+                            </VBox>
+                            <VBox styleClass="vital-tile" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                <Label text="SpO₂" styleClass="vital-caption"/>
+                                <Label fx:id="spo2Value" styleClass="vital-value"/>
+                            </VBox>
+                        </GridPane>
+
+                        <Label text="ALLERGIES" styleClass="section-label"/>
+                        <Label fx:id="allergiesValue" wrapText="true" styleClass="allergy-text"/>
+
+                        <Label text="ACTIVE CONDITIONS" styleClass="section-label"/>
+                        <Label fx:id="conditionsValue" wrapText="true"/>
+
+                        <Region VBox.vgrow="ALWAYS"/>
+                        <Button text="Open Full Chart  →" onAction="#onOpenChart" styleClass="primary-button" maxWidth="Infinity"/>
+                    </VBox>
+                </HBox>
+
+                <!-- Schedule -->
+                <VBox styleClass="card" spacing="12">
+                    <Label text="Today's Schedule" styleClass="card-title"/>
+                    <ListView fx:id="scheduleList" prefHeight="230" styleClass="schedule-list"/>
+                </VBox>
+            </VBox>
+        </ScrollPane>
+    </center>
+</BorderPane>

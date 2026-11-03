@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.chart.PieChart?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="org.amrosman.jsmartclinic.ui.reports.ReportsController"
+      styleClass="page-body" spacing="14">
+    <padding>
+        <Insets top="18" right="18" bottom="18" left="18"/>
+    </padding>
+
+    <HBox styleClass="toolbar-row" spacing="10">
+        <Label text="From"/>
+        <DatePicker fx:id="fromDate" styleClass="form-field" prefWidth="150"/>
+        <Label text="To"/>
+        <DatePicker fx:id="toDate" styleClass="form-field" prefWidth="150"/>
+        <ComboBox fx:id="preset" styleClass="form-field" prefWidth="160"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Label fx:id="rangeLabel" styleClass="muted"/>
+        <Button text="Refresh" onAction="#onRefresh" styleClass="ghost-button"/>
+        <Button fx:id="csvButton" text="Export CSV" onAction="#onExportCsv" styleClass="secondary-button"/>
+        <Button fx:id="pdfButton" text="Export PDF" onAction="#onExportPdf" styleClass="primary-button"/>
+    </HBox>
+
+    <ScrollPane fitToWidth="true" styleClass="page-scroll" VBox.vgrow="ALWAYS">
+        <content>
+            <VBox spacing="16">
+                <HBox spacing="16">
+                    <HBox styleClass="card, stat-card" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+                        <StackPane styleClass="stat-icon, icon-teal">
+                            <FontIcon iconLiteral="fas-coins" styleClass="stat-icon-text"/>
+                        </StackPane>
+                        <VBox>
+                            <Label fx:id="revenueLabel" text="—" styleClass="stat-value"/>
+                            <Label text="Payments collected" styleClass="stat-label"/>
+                        </VBox>
+                    </HBox>
+                    <HBox styleClass="card, stat-card" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+                        <StackPane styleClass="stat-icon, icon-blue">
+                            <FontIcon iconLiteral="fas-calendar-check" styleClass="stat-icon-text"/>
+                        </StackPane>
+                        <VBox>
+                            <Label fx:id="appointmentsLabel" text="—" styleClass="stat-value"/>
+                            <Label text="Appointments" styleClass="stat-label"/>
+                        </VBox>
+                    </HBox>
+                    <HBox styleClass="card, stat-card" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+                        <StackPane styleClass="stat-icon, icon-amber">
+                            <FontIcon iconLiteral="fas-stethoscope" styleClass="stat-icon-text"/>
+                        </StackPane>
+                        <VBox>
+                            <Label fx:id="topDiagnosisLabel" text="—" styleClass="stat-value"/>
+                            <Label text="Top diagnosis" styleClass="stat-label"/>
+                        </VBox>
+                    </HBox>
+                    <HBox styleClass="card, stat-card" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+                        <StackPane styleClass="stat-icon, icon-rose">
+                            <FontIcon iconLiteral="fas-users" styleClass="stat-icon-text"/>
+                        </StackPane>
+                        <VBox>
+                            <Label fx:id="patientsLabel" text="—" styleClass="stat-value"/>
+                            <Label text="Active patients" styleClass="stat-label"/>
+                        </VBox>
+                    </HBox>
+                </HBox>
+
+                <HBox spacing="16">
+                    <VBox styleClass="card" spacing="8" HBox.hgrow="ALWAYS">
+                        <Label text="Revenue by month" styleClass="card-title"/>
+                        <BarChart fx:id="revenueChart" legendVisible="false" animated="false"
+                                  prefHeight="260" maxWidth="Infinity" VBox.vgrow="ALWAYS">
+                            <xAxis><CategoryAxis/></xAxis>
+                            <yAxis><NumberAxis forceZeroInRange="true"/></yAxis>
+                        </BarChart>
+                    </VBox>
+                    <VBox styleClass="card" spacing="8" HBox.hgrow="ALWAYS">
+                        <Label text="Appointments by provider" styleClass="card-title"/>
+                        <BarChart fx:id="providerChart" legendVisible="false" animated="false"
+                                  prefHeight="260" maxWidth="Infinity" VBox.vgrow="ALWAYS">
+                            <xAxis><CategoryAxis/></xAxis>
+                            <yAxis><NumberAxis forceZeroInRange="true" tickUnit="1"/></yAxis>
+                        </BarChart>
+                    </VBox>
+                </HBox>
+
+                <HBox spacing="16">
+                    <VBox styleClass="card" spacing="8" HBox.hgrow="ALWAYS">
+                        <Label text="Top diagnoses" styleClass="card-title"/>
+                        <BarChart fx:id="diagnosisChart" legendVisible="false" animated="false"
+                                  prefHeight="260" maxWidth="Infinity" VBox.vgrow="ALWAYS">
+                            <xAxis><CategoryAxis/></xAxis>
+                            <yAxis><NumberAxis forceZeroInRange="true" tickUnit="1"/></yAxis>
+                        </BarChart>
+                    </VBox>
+                    <VBox styleClass="card" spacing="8" HBox.hgrow="ALWAYS">
+                        <Label text="Patient demographics" styleClass="card-title"/>
+                        <PieChart fx:id="demographicsChart" labelsVisible="true" legendSide="RIGHT"
+                                  prefHeight="260" maxWidth="Infinity" VBox.vgrow="ALWAYS"/>
+                    </VBox>
+                </HBox>
+            </VBox>
+        </content>
+    </ScrollPane>
+</VBox>

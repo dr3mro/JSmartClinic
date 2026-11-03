@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="org.amrosman.jsmartclinic.ui.billing.BillingController"
+      styleClass="page-body" spacing="14">
+    <padding>
+        <Insets top="18" right="18" bottom="18" left="18"/>
+    </padding>
+
+    <HBox styleClass="toolbar-row" spacing="10">
+        <TextField fx:id="searchField" promptText="Filter by invoice or patient" styleClass="search-field"/>
+        <ComboBox fx:id="statusFilter" styleClass="form-field" prefWidth="140"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Label fx:id="countLabel" styleClass="muted"/>
+        <Button text="Refresh" onAction="#onRefresh" styleClass="ghost-button"/>
+        <Button fx:id="receiptButton" text="Receipt" onAction="#onReceipt" styleClass="secondary-button"/>
+        <Button fx:id="paymentButton" text="Record payment" onAction="#onPayment" styleClass="secondary-button"/>
+        <Button fx:id="voidButton" text="Void" onAction="#onVoid" styleClass="danger-button"/>
+        <Button fx:id="newButton" text="+  New invoice" onAction="#onNew" styleClass="primary-button"/>
+    </HBox>
+
+    <HBox spacing="14" VBox.vgrow="ALWAYS">
+        <VBox styleClass="card" spacing="10" HBox.hgrow="ALWAYS">
+            <HBox styleClass="card-header" spacing="10">
+                <Label text="Invoices" styleClass="card-title"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label fx:id="outstandingLabel" styleClass="muted"/>
+            </HBox>
+            <TableView fx:id="invoiceTable" VBox.vgrow="ALWAYS" styleClass="small-table">
+                <columns>
+                    <TableColumn fx:id="numberColumn" text="Invoice" prefWidth="130"/>
+                    <TableColumn fx:id="patientColumn" text="Patient" prefWidth="190"/>
+                    <TableColumn fx:id="issuedColumn" text="Issued" prefWidth="150"/>
+                    <TableColumn fx:id="totalColumn" text="Total" prefWidth="100"/>
+                    <TableColumn fx:id="paidColumn" text="Paid" prefWidth="100"/>
+                    <TableColumn fx:id="balanceColumn" text="Balance" prefWidth="100"/>
+                    <TableColumn fx:id="statusColumn" text="Status" prefWidth="100"/>
+                </columns>
+            </TableView>
+        </VBox>
+
+        <VBox styleClass="card" spacing="10" prefWidth="430" minWidth="360">
+            <Label fx:id="detailTitle" text="Invoice details" styleClass="card-title"/>
+            <Label fx:id="detailMeta" styleClass="muted" wrapText="true"/>
+            <Label text="ITEMS" styleClass="section-label"/>
+            <TableView fx:id="itemTable" prefHeight="220" styleClass="small-table">
+                <columns>
+                    <TableColumn fx:id="itemDescription" text="Description" prefWidth="220"/>
+                    <TableColumn fx:id="itemQty" text="Qty" prefWidth="60"/>
+                    <TableColumn fx:id="itemPrice" text="Price" prefWidth="100"/>
+                    <TableColumn fx:id="itemTotal" text="Total" prefWidth="100"/>
+                </columns>
+            </TableView>
+            <Label text="PAYMENTS" styleClass="section-label"/>
+            <TableView fx:id="paymentTable" prefHeight="160" styleClass="small-table">
+                <columns>
+                    <TableColumn fx:id="paymentDate" text="Date" prefWidth="140"/>
+                    <TableColumn fx:id="paymentMethod" text="Method" prefWidth="90"/>
+                    <TableColumn fx:id="paymentReference" text="Reference" prefWidth="120"/>
+                    <TableColumn fx:id="paymentAmount" text="Amount" prefWidth="100"/>
+                </columns>
+            </TableView>
+            <Label fx:id="totalsLabel" styleClass="muted" wrapText="true"/>
+        </VBox>
+    </HBox>
+</VBox>

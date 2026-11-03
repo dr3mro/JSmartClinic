@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="org.amrosman.jsmartclinic.ui.encounters.EncounterEditorController"
+      styleClass="page-body" spacing="12">
+    <padding>
+        <Insets top="18" right="18" bottom="18" left="18"/>
+    </padding>
+
+    <HBox styleClass="chart-header" spacing="14">
+        <StackPane styleClass="chart-avatar">
+            <Label fx:id="avatarLabel" text="—" styleClass="chart-avatar-text"/>
+        </StackPane>
+        <VBox spacing="2">
+            <Label fx:id="patientName" text="Encounter" styleClass="chart-name"/>
+            <Label fx:id="patientMeta" styleClass="chart-meta"/>
+        </VBox>
+        <Region HBox.hgrow="ALWAYS"/>
+        <VBox spacing="2">
+            <Label fx:id="encounterDateLabel" styleClass="muted"/>
+            <Label fx:id="statusLabel" styleClass="badge"/>
+        </VBox>
+        <Button text="← Back" onAction="#onBack" styleClass="ghost-button"/>
+        <Button fx:id="saveButton" text="Save draft" onAction="#onSave" styleClass="secondary-button"/>
+        <Button fx:id="signButton" text="Sign encounter" onAction="#onSign" styleClass="primary-button"/>
+        <Button fx:id="addendumButton" text="Create addendum" onAction="#onAddendum"
+                styleClass="primary-button"/>
+        <Button fx:id="invoiceButton" text="Invoice" onAction="#onInvoice" styleClass="secondary-button"/>
+    </HBox>
+
+    <Label fx:id="signedBanner" styleClass="warn-banner" wrapText="true" visible="false"
+           managed="false"/>
+
+    <ScrollPane fitToWidth="true" styleClass="content-scroll" VBox.vgrow="ALWAYS">
+        <VBox spacing="14">
+            <HBox spacing="14">
+                <VBox styleClass="card" spacing="10" HBox.hgrow="ALWAYS">
+                    <HBox styleClass="card-header" spacing="10">
+                        <Label text="SOAP note" styleClass="card-title"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="autosaveLabel" styleClass="muted"/>
+                    </HBox>
+                    <TextField fx:id="chiefComplaint" promptText="Chief complaint"
+                               styleClass="form-field"/>
+                    <Label text="Subjective" styleClass="section-label"/>
+                    <TextArea fx:id="subjective" prefRowCount="3" wrapText="true" styleClass="form-field"/>
+                    <Label text="Objective" styleClass="section-label"/>
+                    <TextArea fx:id="objective" prefRowCount="3" wrapText="true" styleClass="form-field"/>
+                    <Label text="Assessment" styleClass="section-label"/>
+                    <TextArea fx:id="assessment" prefRowCount="3" wrapText="true" styleClass="form-field"/>
+                    <Label text="Plan" styleClass="section-label"/>
+                    <TextArea fx:id="plan" prefRowCount="3" wrapText="true" styleClass="form-field"/>
+                </VBox>
+
+                <VBox styleClass="card" spacing="8" prefWidth="430" minWidth="360">
+                    <HBox styleClass="card-header" spacing="10">
+                        <Label text="Specialty template" styleClass="card-title"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <ComboBox fx:id="templateCombo" styleClass="form-field" prefWidth="220"/>
+                    </HBox>
+                    <Label fx:id="templateHint" styleClass="muted" wrapText="true"/>
+                    <ScrollPane fitToWidth="true" prefHeight="620" styleClass="content-scroll">
+                        <VBox fx:id="templateBox" spacing="8"/>
+                    </ScrollPane>
+                </VBox>
+            </HBox>
+
+            <HBox spacing="14">
+                <VBox styleClass="card" spacing="8" HBox.hgrow="ALWAYS">
+                    <HBox styleClass="card-header" spacing="8">
+                        <Label text="Diagnoses" styleClass="card-title"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Button fx:id="addDiagnosisButton" text="+  Add diagnosis" onAction="#onAddDiagnosis"
+                                styleClass="ghost-button"/>
+                        <Button fx:id="removeDiagnosisButton" text="Remove" onAction="#onRemoveDiagnosis"
+                                styleClass="ghost-button"/>
+                    </HBox>
+                    <TableView fx:id="diagnosesTable" prefHeight="180" styleClass="small-table">
+                        <columns>
+                            <TableColumn fx:id="diagnosisCode" text="ICD-10" prefWidth="100"/>
+                            <TableColumn fx:id="diagnosisDescription" text="Description" prefWidth="320"/>
+                            <TableColumn fx:id="diagnosisPrimary" text="Primary" prefWidth="80"/>
+                        </columns>
+                    </TableView>
+                </VBox>
+
+                <VBox styleClass="card" spacing="8" HBox.hgrow="ALWAYS">
+                    <HBox styleClass="card-header" spacing="8">
+                        <Label text="Vitals" styleClass="card-title"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Button fx:id="addVitalButton" text="+  Record vitals" onAction="#onAddVitals"
+                                styleClass="ghost-button"/>
+                    </HBox>
+                    <TableView fx:id="vitalsTable" prefHeight="180" styleClass="small-table">
+                        <columns>
+                            <TableColumn fx:id="vitalMeasured" text="Measured" prefWidth="150"/>
+                            <TableColumn fx:id="vitalBp" text="BP" prefWidth="90"/>
+                            <TableColumn fx:id="vitalHr" text="HR" prefWidth="70"/>
+                            <TableColumn fx:id="vitalTemp" text="Temp" prefWidth="80"/>
+                            <TableColumn fx:id="vitalSpo2" text="SpO₂" prefWidth="70"/>
+                            <TableColumn fx:id="vitalBmi" text="BMI" prefWidth="70"/>
+                        </columns>
+                    </TableView>
+                </VBox>
+            </HBox>
+        </VBox>
+    </ScrollPane>
+</VBox>

@@ -1,0 +1,46 @@
+{
+  "id": "obgyn",
+  "name": "Obstetrics & Gynaecology",
+  "specialty": "Obstetrics",
+  "sections": [
+    {
+      "title": "Menstrual & obstetric history",
+      "fields": [
+        {"key": "lmp", "label": "Last menstrual period", "type": "date"},
+        {"key": "cycle", "label": "Cycle length / regularity", "type": "text"},
+        {"key": "gravida", "label": "Gravida", "type": "number", "min": 0, "max": 30},
+        {"key": "para", "label": "Para", "type": "number", "min": 0, "max": 30},
+        {"key": "abortions", "label": "Abortions", "type": "number", "min": 0, "max": 30},
+        {"key": "contraception", "label": "Contraception", "type": "text"},
+        {"key": "obstetric_history", "label": "Previous pregnancies", "type": "textarea"}
+      ]
+    },
+    {
+      "title": "Current pregnancy",
+      "fields": [
+        {"key": "gestational_age", "label": "Gestational age (weeks)", "type": "number", "min": 0, "max": 45, "unit": "wks"},
+        {"key": "fundal_height", "label": "Fundal height (cm)", "type": "number", "min": 0, "max": 60, "unit": "cm"},
+        {"key": "fetal_heart", "label": "Fetal heart rate", "type": "number", "min": 60, "max": 220, "unit": "bpm"},
+        {"key": "presentation", "label": "Presentation", "type": "select", "options": ["Cephalic", "Breech", "Transverse", "Unknown"]},
+        {"key": "movements", "label": "Fetal movements", "type": "select", "options": ["Normal", "Reduced", "Absent"]}
+      ]
+    },
+    {
+      "title": "Examination",
+      "fields": [
+        {"key": "bp_review", "label": "Blood pressure review", "type": "text"},
+        {"key": "urine", "label": "Urine dipstick", "type": "text"},
+        {"key": "oedema", "label": "Oedema", "type": "text"},
+        {"key": "pelvic_exam", "label": "Pelvic examination", "type": "textarea"}
+      ]
+    },
+    {
+      "title": "Plan",
+      "fields": [
+        {"key": "scan", "label": "Ultrasound / scan", "type": "text"},
+        {"key": "supplements", "label": "Supplements", "type": "text"},
+        {"key": "delivery_plan", "label": "Delivery plan", "type": "textarea"}
+      ]
+    }
+  ]
+}

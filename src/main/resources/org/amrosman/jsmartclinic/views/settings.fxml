@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="org.amrosman.jsmartclinic.ui.settings.SettingsController"
+      styleClass="page-body" spacing="14">
+    <padding>
+        <Insets top="18" right="18" bottom="18" left="18"/>
+    </padding>
+
+    <TabPane fx:id="settingsTabs" tabClosingPolicy="UNAVAILABLE" styleClass="tab-pane" VBox.vgrow="ALWAYS">
+        <Tab text="Clinic profile" closable="false">
+            <ScrollPane fitToWidth="true" styleClass="page-scroll">
+                <content>
+                    <VBox spacing="16">
+                        <padding>
+                            <Insets top="16" right="16" bottom="16" left="16"/>
+                        </padding>
+
+                        <VBox styleClass="card" spacing="12">
+                            <Label text="Clinic details" styleClass="card-title"/>
+                            <Label text="Shown in the header of every prescription, receipt and report PDF."
+                                   styleClass="muted"/>
+                            <GridPane hgap="12" vgap="10">
+                                <Label text="Clinic name" styleClass="form-label" GridPane.rowIndex="0"
+                                       GridPane.columnIndex="0"/>
+                                <TextField fx:id="profileName" styleClass="form-field" prefWidth="360"
+                                           GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                                <Label text="Address" styleClass="form-label" GridPane.rowIndex="1"
+                                       GridPane.columnIndex="0"/>
+                                <TextField fx:id="profileAddress" styleClass="form-field" prefWidth="360"
+                                           GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                                <Label text="Phone" styleClass="form-label" GridPane.rowIndex="2"
+                                       GridPane.columnIndex="0"/>
+                                <TextField fx:id="profilePhone" styleClass="form-field" prefWidth="360"
+                                           GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                                <Label text="Email" styleClass="form-label" GridPane.rowIndex="3"
+                                       GridPane.columnIndex="0"/>
+                                <TextField fx:id="profileEmail" styleClass="form-field" prefWidth="360"
+                                           GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+                                <Label text="Logo" styleClass="form-label" GridPane.rowIndex="4"
+                                       GridPane.columnIndex="0"/>
+                                <HBox spacing="8" GridPane.rowIndex="4" GridPane.columnIndex="1">
+                                    <TextField fx:id="profileLogo" styleClass="form-field" prefWidth="280"
+                                               HBox.hgrow="ALWAYS"/>
+                                    <Button text="Browse…" onAction="#onBrowseLogo" styleClass="ghost-button"/>
+                                </HBox>
+                                <Label text="Currency" styleClass="form-label" GridPane.rowIndex="5"
+                                       GridPane.columnIndex="0"/>
+                                <TextField fx:id="profileCurrency" styleClass="form-field" prefWidth="120"
+                                           GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+                                <Label text="Tax rate (%)" styleClass="form-label" GridPane.rowIndex="6"
+                                       GridPane.columnIndex="0"/>
+                                <TextField fx:id="profileTax" styleClass="form-field" prefWidth="120"
+                                           GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+                            </GridPane>
+                        </VBox>
+
+                        <VBox styleClass="card" spacing="12">
+                            <Label text="Preferences" styleClass="card-title"/>
+                            <GridPane hgap="12" vgap="10">
+                                <Label text="Theme" styleClass="form-label" GridPane.rowIndex="0"
+                                       GridPane.columnIndex="0"/>
+                                <ComboBox fx:id="themeBox" styleClass="form-field" prefWidth="180"
+                                          GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                                <Label text="Language" styleClass="form-label" GridPane.rowIndex="1"
+                                       GridPane.columnIndex="0"/>
+                                <ComboBox fx:id="languageBox" styleClass="form-field" prefWidth="180"
+                                          GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                                <Label text="Backups" styleClass="form-label" GridPane.rowIndex="2"
+                                       GridPane.columnIndex="0"/>
+                                <CheckBox fx:id="autoBackup" text="Create a daily automatic backup"
+                                          GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                            </GridPane>
+                            <Label fx:id="profileStatus" styleClass="muted"/>
+                            <HBox spacing="10">
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Button text="Save settings" onAction="#onSaveProfile" styleClass="primary-button"/>
+                            </HBox>
+                        </VBox>
+                    </VBox>
+                </content>
+            </ScrollPane>
+        </Tab>
+
+        <Tab text="Users" closable="false">
+            <VBox spacing="12">
+                <padding>
+                    <Insets top="16" right="16" bottom="16" left="16"/>
+                </padding>
+                <HBox styleClass="toolbar-row" spacing="10">
+                    <Label fx:id="userCountLabel" styleClass="muted"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button text="Refresh" onAction="#onRefreshUsers" styleClass="ghost-button"/>
+                    <Button fx:id="resetPasswordButton" text="Reset password" onAction="#onResetPassword"
+                            styleClass="secondary-button"/>
+                    <Button fx:id="editUserButton" text="Edit user" onAction="#onEditUser"
+                            styleClass="secondary-button"/>
+                    <Button fx:id="newUserButton" text="+  New user" onAction="#onNewUser"
+                            styleClass="primary-button"/>
+                </HBox>
+                <TableView fx:id="userTable" styleClass="small-table" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="userNameColumn" text="Username" prefWidth="140"/>
+                        <TableColumn fx:id="userFullNameColumn" text="Full name" prefWidth="200"/>
+                        <TableColumn fx:id="userRoleColumn" text="Role" prefWidth="120"/>
+                        <TableColumn fx:id="userSpecialtyColumn" text="Specialty" prefWidth="150"/>
+                        <TableColumn fx:id="userActiveColumn" text="Active" prefWidth="80"/>
+                        <TableColumn fx:id="userLastLoginColumn" text="Last login" prefWidth="160"/>
+                    </columns>
+                </TableView>
+            </VBox>
+        </Tab>
+
+        <Tab text="Catalogues" closable="false">
+            <VBox spacing="12">
+                <padding>
+                    <Insets top="16" right="16" bottom="16" left="16"/>
+                </padding>
+                <TabPane tabClosingPolicy="UNAVAILABLE" styleClass="tab-pane" VBox.vgrow="ALWAYS">
+                    <Tab text="Lab tests" closable="false">
+                        <VBox spacing="12">
+                            <padding>
+                                <Insets top="12" right="12" bottom="12" left="12"/>
+                            </padding>
+                            <HBox styleClass="toolbar-row" spacing="10">
+                                <Label fx:id="labCountLabel" styleClass="muted"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Button fx:id="deleteLabButton" text="Delete" onAction="#onDeleteLab"
+                                        styleClass="danger-button"/>
+                                <Button fx:id="editLabButton" text="Edit" onAction="#onEditLab"
+                                        styleClass="secondary-button"/>
+                                <Button text="+  New test" onAction="#onNewLab" styleClass="primary-button"/>
+                            </HBox>
+                            <TableView fx:id="labTable" styleClass="small-table" VBox.vgrow="ALWAYS">
+                                <columns>
+                                    <TableColumn fx:id="labCodeColumn" text="Code" prefWidth="100"/>
+                                    <TableColumn fx:id="labNameColumn" text="Test" prefWidth="240"/>
+                                    <TableColumn fx:id="labUnitColumn" text="Unit" prefWidth="90"/>
+                                    <TableColumn fx:id="labRangeColumn" text="Reference range" prefWidth="160"/>
+                                    <TableColumn fx:id="labCategoryColumn" text="Category" prefWidth="140"/>
+                                </columns>
+                            </TableView>
+                        </VBox>
+                    </Tab>
+                    <Tab text="Services" closable="false">
+                        <VBox spacing="12">
+                            <padding>
+                                <Insets top="12" right="12" bottom="12" left="12"/>
+                            </padding>
+                            <HBox styleClass="toolbar-row" spacing="10">
+                                <Label fx:id="serviceCountLabel" styleClass="muted"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Button fx:id="editServiceButton" text="Edit" onAction="#onEditService"
+                                        styleClass="secondary-button"/>
+                                <Button text="+  New service" onAction="#onNewService" styleClass="primary-button"/>
+                            </HBox>
+                            <TableView fx:id="serviceTable" styleClass="small-table" VBox.vgrow="ALWAYS">
+                                <columns>
+                                    <TableColumn fx:id="serviceCodeColumn" text="Code" prefWidth="100"/>
+                                    <TableColumn fx:id="serviceNameColumn" text="Service" prefWidth="300"/>
+                                    <TableColumn fx:id="servicePriceColumn" text="Price" prefWidth="120"/>
+                                    <TableColumn fx:id="serviceActiveColumn" text="Status" prefWidth="110"/>
+                                </columns>
+                            </TableView>
+                        </VBox>
+                    </Tab>
+                </TabPane>
+            </VBox>
+        </Tab>
+
+        <Tab text="Backup" closable="false">
+            <VBox spacing="12">
+                <padding>
+                    <Insets top="16" right="16" bottom="16" left="16"/>
+                </padding>
+                <HBox styleClass="toolbar-row" spacing="10">
+                    <Label fx:id="backupStatus" styleClass="muted"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button text="Refresh" onAction="#onRefreshBackups" styleClass="ghost-button"/>
+                    <Button fx:id="restoreButton" text="Restore selected" onAction="#onRestore"
+                            styleClass="danger-button"/>
+                    <Button text="Back up now" onAction="#onBackupNow" styleClass="primary-button"/>
+                </HBox>
+                <ListView fx:id="backupList" styleClass="small-table" VBox.vgrow="ALWAYS"/>
+                <Label text="Backups are stored in the application data folder. Restoring replaces the current database and requires a restart."
+                       styleClass="muted" wrapText="true"/>
+            </VBox>
+        </Tab>
+
+        <Tab text="Audit log" closable="false">
+            <VBox spacing="12">
+                <padding>
+                    <Insets top="16" right="16" bottom="16" left="16"/>
+                </padding>
+                <HBox styleClass="toolbar-row" spacing="10">
+                    <Label fx:id="auditCountLabel" styleClass="muted"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button text="Refresh" onAction="#onRefreshAudit" styleClass="ghost-button"/>
+                </HBox>
+                <TableView fx:id="auditTable" styleClass="small-table" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="auditAtColumn" text="When" prefWidth="160"/>
+                        <TableColumn fx:id="auditUserColumn" text="User" prefWidth="150"/>
+                        <TableColumn fx:id="auditActionColumn" text="Action" prefWidth="100"/>
+                        <TableColumn fx:id="auditEntityColumn" text="Entity" prefWidth="150"/>
+                        <TableColumn fx:id="auditDetailsColumn" text="Details" prefWidth="320"/>
+                    </columns>
+                </TableView>
+            </VBox>
+        </Tab>
+    </TabPane>
+</VBox>

@@ -1,0 +1,51 @@
+{
+  "id": "cardiology",
+  "name": "Cardiology",
+  "specialty": "Cardiology",
+  "sections": [
+    {
+      "title": "Cardiac history",
+      "fields": [
+        {"key": "chest_pain", "label": "Chest pain", "type": "select", "options": ["None", "Typical angina", "Atypical", "Non-cardiac"]},
+        {"key": "chest_pain_character", "label": "Character / radiation", "type": "textarea"},
+        {"key": "dyspnoea_class", "label": "NYHA class", "type": "select", "options": ["I", "II", "III", "IV"]},
+        {"key": "palpitations", "label": "Palpitations", "type": "checkbox"},
+        {"key": "syncope", "label": "Syncope", "type": "checkbox"},
+        {"key": "oedema", "label": "Peripheral oedema", "type": "checkbox"},
+        {"key": "orthopnoea", "label": "Orthopnoea", "type": "checkbox"}
+      ]
+    },
+    {
+      "title": "Risk factors",
+      "fields": [
+        {"key": "hypertension", "label": "Hypertension", "type": "checkbox"},
+        {"key": "diabetes", "label": "Diabetes", "type": "checkbox"},
+        {"key": "dyslipidaemia", "label": "Dyslipidaemia", "type": "checkbox"},
+        {"key": "smoking", "label": "Smoking", "type": "checkbox"},
+        {"key": "family_cad", "label": "Family history of CAD", "type": "checkbox"},
+        {"key": "prior_mi", "label": "Prior myocardial infarction", "type": "checkbox"},
+        {"key": "prior_pci_cabg", "label": "Prior PCI / CABG", "type": "checkbox"}
+      ]
+    },
+    {
+      "title": "Cardiac examination",
+      "fields": [
+        {"key": "jvp", "label": "JVP", "type": "text"},
+        {"key": "apex_beat", "label": "Apex beat", "type": "text"},
+        {"key": "heart_sounds", "label": "Heart sounds", "type": "text"},
+        {"key": "murmurs", "label": "Murmurs", "type": "text"},
+        {"key": "lung_bases", "label": "Lung bases", "type": "text"},
+        {"key": "peripheral_pulses", "label": "Peripheral pulses", "type": "text"}
+      ]
+    },
+    {
+      "title": "Investigations",
+      "fields": [
+        {"key": "ecg_findings", "label": "ECG findings", "type": "textarea"},
+        {"key": "echo_ef", "label": "Ejection fraction (%)", "type": "number", "min": 0, "max": 100, "unit": "%"},
+        {"key": "bnp", "label": "BNP / NT-proBNP", "type": "text"},
+        {"key": "stress_test", "label": "Stress test", "type": "textarea"}
+      ]
+    }
+  ]
+}

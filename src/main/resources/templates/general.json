@@ -1,0 +1,48 @@
+{
+  "id": "general",
+  "name": "General Medicine",
+  "specialty": "General",
+  "sections": [
+    {
+      "title": "History",
+      "fields": [
+        {"key": "history_present_illness", "label": "History of present illness", "type": "textarea"},
+        {"key": "past_medical", "label": "Past medical history", "type": "textarea"},
+        {"key": "family_history", "label": "Family history", "type": "textarea"},
+        {"key": "social_history", "label": "Social history", "type": "textarea"},
+        {"key": "smoking", "label": "Smoking status", "type": "select", "options": ["Never", "Former", "Current"]},
+        {"key": "alcohol", "label": "Alcohol use", "type": "select", "options": ["None", "Occasional", "Regular", "Heavy"]}
+      ]
+    },
+    {
+      "title": "Review of systems",
+      "fields": [
+        {"key": "ros_general", "label": "Constitutional", "type": "textarea", "placeholder": "Fever, weight change, fatigue…"},
+        {"key": "ros_cardio", "label": "Cardiovascular", "type": "textarea", "placeholder": "Chest pain, palpitations, oedema…"},
+        {"key": "ros_resp", "label": "Respiratory", "type": "textarea", "placeholder": "Cough, dyspnoea, wheeze…"},
+        {"key": "ros_gi", "label": "Gastrointestinal", "type": "textarea", "placeholder": "Appetite, nausea, bowel habit…"},
+        {"key": "ros_neuro", "label": "Neurological", "type": "textarea", "placeholder": "Headache, weakness, sensation…"}
+      ]
+    },
+    {
+      "title": "Examination",
+      "fields": [
+        {"key": "general_appearance", "label": "General appearance", "type": "text"},
+        {"key": "heent", "label": "HEENT", "type": "text"},
+        {"key": "chest", "label": "Chest", "type": "text"},
+        {"key": "heart", "label": "Heart", "type": "text"},
+        {"key": "abdomen", "label": "Abdomen", "type": "text"},
+        {"key": "extremities", "label": "Extremities", "type": "text"},
+        {"key": "neuro_exam", "label": "Neurological", "type": "text"}
+      ]
+    },
+    {
+      "title": "Assessment & plan",
+      "fields": [
+        {"key": "follow_up_weeks", "label": "Follow-up in (weeks)", "type": "number", "min": 0, "max": 52},
+        {"key": "lifestyle", "label": "Lifestyle advice", "type": "textarea"},
+        {"key": "referral", "label": "Referral", "type": "text"}
+      ]
+    }
+  ]
+}

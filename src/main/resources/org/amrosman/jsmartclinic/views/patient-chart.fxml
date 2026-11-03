@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="org.amrosman.jsmartclinic.ui.patients.PatientChartController"
+      styleClass="page-body" spacing="14">
+
+    <HBox styleClass="chart-header" spacing="16">
+        <Button text="← Patients" onAction="#onBack" styleClass="ghost-button"/>
+        <StackPane styleClass="chart-avatar">
+            <Label fx:id="avatarLabel" text="?" styleClass="chart-avatar-text"/>
+            <ImageView fx:id="photoView" fitWidth="68" fitHeight="68" preserveRatio="true"/>
+        </StackPane>
+        <VBox spacing="3">
+            <Label fx:id="patientName" text="Patient" styleClass="chart-name"/>
+            <Label fx:id="patientMeta" styleClass="chart-meta"/>
+            <Label fx:id="allergyBanner" styleClass="allergy-banner" managed="false" visible="false"/>
+        </VBox>
+        <Region HBox.hgrow="ALWAYS"/>
+        <VBox spacing="8">
+            <HBox spacing="8">
+                <Button fx:id="editButton" text="Edit patient" onAction="#onEdit" styleClass="secondary-button"/>
+                <Button fx:id="encounterButton" text="New encounter" onAction="#onNewEncounter" styleClass="primary-button"/>
+            </HBox>
+            <HBox spacing="8">
+                <Button fx:id="prescriptionButton" text="Prescribe" onAction="#onNewPrescription" styleClass="secondary-button"/>
+                <Button fx:id="labButton" text="Order labs" onAction="#onOrderLabs" styleClass="secondary-button"/>
+                <Button fx:id="invoiceButton" text="New invoice" onAction="#onNewInvoice" styleClass="secondary-button"/>
+            </HBox>
+        </VBox>
+    </HBox>
+
+    <TabPane fx:id="chartTabs" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
+        <Tab text="Summary">
+            <VBox spacing="14" styleClass="page-body">
+                <HBox spacing="14">
+                    <VBox styleClass="card" spacing="8" HBox.hgrow="ALWAYS">
+                        <Label text="Demographics" styleClass="card-title"/>
+                        <GridPane fx:id="demographicsGrid" styleClass="field-grid" hgap="14" vgap="8"/>
+                    </VBox>
+                    <VBox styleClass="card" spacing="8" HBox.hgrow="ALWAYS">
+                        <Label text="Latest vitals" styleClass="card-title"/>
+                        <HBox fx:id="summaryVitals" spacing="10"/>
+                        <Label text="Active problems" styleClass="section-label"/>
+                        <Label fx:id="problemSummaryLabel" wrapText="true" styleClass="muted"/>
+                        <Label text="Current medications" styleClass="section-label"/>
+                        <Label fx:id="medicationSummaryLabel" wrapText="true" styleClass="muted"/>
+                        <Label text="Outstanding balance" styleClass="section-label"/>
+                        <Label fx:id="balanceLabel" styleClass="kpi-value"/>
+                    </VBox>
+                </HBox>
+                <VBox styleClass="card" spacing="8">
+                    <Label text="Recent encounters" styleClass="card-title"/>
+                    <TableView fx:id="summaryEncounters" prefHeight="190" styleClass="small-table">
+                        <columns>
+                            <TableColumn fx:id="summaryEncounterDate" text="Date" prefWidth="180"/>
+                            <TableColumn fx:id="summaryEncounterSpecialty" text="Specialty" prefWidth="160"/>
+                            <TableColumn fx:id="summaryEncounterStatus" text="Status" prefWidth="120"/>
+                        </columns>
+                    </TableView>
+                </VBox>
+            </VBox>
+        </Tab>
+
+        <Tab text="Encounters">
+            <VBox spacing="10" styleClass="page-body">
+                <HBox styleClass="toolbar-row">
+                    <Label text="Visit notes and addenda" styleClass="muted"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button text="Delete draft" onAction="#onDeleteDraft" styleClass="danger-button"/>
+                    <Button text="Open" onAction="#onOpenEncounter" styleClass="secondary-button"/>
+                    <Button text="+  New encounter" onAction="#onNewEncounter" styleClass="primary-button"/>
+                </HBox>
+                <TableView fx:id="encountersTable" VBox.vgrow="ALWAYS" styleClass="small-table">
+                    <columns>
+                        <TableColumn fx:id="encounterDate" text="Date" prefWidth="180"/>
+                        <TableColumn fx:id="encounterSpecialty" text="Specialty" prefWidth="160"/>
+                        <TableColumn fx:id="encounterTemplate" text="Template" prefWidth="150"/>
+                        <TableColumn fx:id="encounterStatus" text="Status" prefWidth="120"/>
+                        <TableColumn fx:id="encounterSigned" text="Signed" prefWidth="180"/>
+                    </columns>
+                </TableView>
+            </VBox>
+        </Tab>
+
+        <Tab text="Problems">
+            <VBox spacing="10" styleClass="page-body">
+                <HBox styleClass="toolbar-row">
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button text="Remove" onAction="#onRemoveProblem" styleClass="danger-button"/>
+                    <Button text="Edit" onAction="#onEditProblem" styleClass="secondary-button"/>
+                    <Button text="+  Add problem" onAction="#onAddProblem" styleClass="primary-button"/>
+                </HBox>
+                <TableView fx:id="problemsTable" VBox.vgrow="ALWAYS" styleClass="small-table">
+                    <columns>
+                        <TableColumn fx:id="problemCode" text="ICD-10" prefWidth="110"/>
+                        <TableColumn fx:id="problemDescription" text="Problem" prefWidth="340"/>
+                        <TableColumn fx:id="problemOnset" text="Onset" prefWidth="130"/>
+                        <TableColumn fx:id="problemStatus" text="Status" prefWidth="120"/>
+                    </columns>
+                </TableView>
+            </VBox>
+        </Tab>
+
+        <Tab text="Allergies">
+            <VBox spacing="10" styleClass="page-body">
+                <HBox styleClass="toolbar-row">
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button text="Remove" onAction="#onRemoveAllergy" styleClass="danger-button"/>
+                    <Button text="+  Record allergy" onAction="#onAddAllergy" styleClass="primary-button"/>
+                </HBox>
+                <TableView fx:id="allergiesTable" VBox.vgrow="ALWAYS" styleClass="small-table">
+                    <columns>
+                        <TableColumn fx:id="allergySubstance" text="Substance" prefWidth="220"/>
+                        <TableColumn fx:id="allergyReaction" text="Reaction" prefWidth="300"/>
+                        <TableColumn fx:id="allergySeverity" text="Severity" prefWidth="130"/>
+                        <TableColumn fx:id="allergyActive" text="Active" prefWidth="100"/>
+                    </columns>
+                </TableView>
+            </VBox>
+        </Tab>
+
+        <Tab text="Medications">
+            <VBox spacing="10" styleClass="page-body">
+                <HBox styleClass="toolbar-row">
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button text="Stop" onAction="#onStopMedication" styleClass="danger-button"/>
+                    <Button text="Edit" onAction="#onEditMedication" styleClass="secondary-button"/>
+                    <Button text="+  Add medication" onAction="#onAddMedication" styleClass="primary-button"/>
+                </HBox>
+                <TableView fx:id="medicationsTable" VBox.vgrow="ALWAYS" styleClass="small-table">
+                    <columns>
+                        <TableColumn fx:id="medName" text="Medication" prefWidth="200"/>
+                        <TableColumn fx:id="medDose" text="Dose" prefWidth="120"/>
+                        <TableColumn fx:id="medRoute" text="Route" prefWidth="120"/>
+                        <TableColumn fx:id="medFrequency" text="Frequency" prefWidth="150"/>
+                        <TableColumn fx:id="medStart" text="Started" prefWidth="120"/>
+                        <TableColumn fx:id="medActive" text="Active" prefWidth="90"/>
+                    </columns>
+                </TableView>
+            </VBox>
+        </Tab>
+
+        <Tab text="Vitals">
+            <VBox spacing="10" styleClass="page-body">
+                <HBox styleClass="toolbar-row">
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button text="Remove" onAction="#onRemoveVital" styleClass="danger-button"/>
+                    <Button text="+  Record vitals" onAction="#onAddVital" styleClass="primary-button"/>
+                </HBox>
+                <TableView fx:id="vitalsTable" VBox.vgrow="ALWAYS" styleClass="small-table">
+                    <columns>
+                        <TableColumn fx:id="vitalMeasured" text="Measured" prefWidth="180"/>
+                        <TableColumn fx:id="vitalBp" text="BP" prefWidth="100"/>
+                        <TableColumn fx:id="vitalHr" text="HR" prefWidth="70"/>
+                        <TableColumn fx:id="vitalTemp" text="Temp" prefWidth="80"/>
+                        <TableColumn fx:id="vitalSpo2" text="SpO₂" prefWidth="80"/>
+                        <TableColumn fx:id="vitalWeight" text="Weight" prefWidth="90"/>
+                        <TableColumn fx:id="vitalBmi" text="BMI" prefWidth="80"/>
+                    </columns>
+                </TableView>
+            </VBox>
+        </Tab>
+
+        <Tab text="Labs">
+            <VBox spacing="10" styleClass="page-body">
+                <HBox styleClass="toolbar-row">
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button text="Trend" onAction="#onLabTrend" styleClass="secondary-button"/>
+                    <Button text="Enter result" onAction="#onEnterResult" styleClass="secondary-button"/>
+                    <Button text="+  Order labs" onAction="#onOrderLabs" styleClass="primary-button"/>
+                </HBox>
+                <TableView fx:id="labsTable" VBox.vgrow="ALWAYS" styleClass="small-table">
+                    <columns>
+                        <TableColumn fx:id="labOrdered" text="Ordered" prefWidth="160"/>
+                        <TableColumn fx:id="labTest" text="Test" prefWidth="220"/>
+                        <TableColumn fx:id="labValue" text="Result" prefWidth="110"/>
+                        <TableColumn fx:id="labUnit" text="Unit" prefWidth="100"/>
+                        <TableColumn fx:id="labRange" text="Reference" prefWidth="130"/>
+                        <TableColumn fx:id="labFlag" text="Flag" prefWidth="110"/>
+                        <TableColumn fx:id="labStatus" text="Status" prefWidth="110"/>
+                    </columns>
+                </TableView>
+            </VBox>
+        </Tab>
+
+        <Tab text="Prescriptions">
+            <VBox spacing="10" styleClass="page-body">
+                <HBox styleClass="toolbar-row">
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button text="Renew" onAction="#onRenewPrescription" styleClass="secondary-button"/>
+                    <Button text="Print PDF" onAction="#onPrintPrescription" styleClass="secondary-button"/>
+                    <Button text="View" onAction="#onViewPrescription" styleClass="secondary-button"/>
+                    <Button text="+  New prescription" onAction="#onNewPrescription" styleClass="primary-button"/>
+                </HBox>
+                <TableView fx:id="prescriptionsTable" VBox.vgrow="ALWAYS" styleClass="small-table">
+                    <columns>
+                        <TableColumn fx:id="rxIssued" text="Issued" prefWidth="180"/>
+                        <TableColumn fx:id="rxPrescriber" text="Prescriber" prefWidth="200"/>
+                        <TableColumn fx:id="rxItems" text="Items" prefWidth="80"/>
+                        <TableColumn fx:id="rxNotes" text="Notes" prefWidth="320"/>
+                    </columns>
+                </TableView>
+            </VBox>
+        </Tab>
+
+        <Tab text="Documents">
+            <VBox spacing="10" styleClass="page-body">
+                <HBox styleClass="toolbar-row">
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button text="Delete" onAction="#onDeleteDocument" styleClass="danger-button"/>
+                    <Button text="Open" onAction="#onOpenDocument" styleClass="secondary-button"/>
+                    <Button text="+  Attach document" onAction="#onAttachDocument" styleClass="primary-button"/>
+                </HBox>
+                <TableView fx:id="documentsTable" VBox.vgrow="ALWAYS" styleClass="small-table">
+                    <columns>
+                        <TableColumn fx:id="docTitle" text="Title" prefWidth="280"/>
+                        <TableColumn fx:id="docFile" text="File" prefWidth="260"/>
+                        <TableColumn fx:id="docType" text="Type" prefWidth="160"/>
+                        <TableColumn fx:id="docUploaded" text="Uploaded" prefWidth="180"/>
+                    </columns>
+                </TableView>
+            </VBox>
+        </Tab>
+
+        <Tab text="Billing">
+            <VBox spacing="10" styleClass="page-body">
+                <HBox styleClass="toolbar-row">
+                    <Label fx:id="billingBalance" styleClass="kpi-value"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button text="Receipt" onAction="#onReceipt" styleClass="secondary-button"/>
+                    <Button text="Record payment" onAction="#onRecordPayment" styleClass="secondary-button"/>
+                    <Button text="+  New invoice" onAction="#onNewInvoice" styleClass="primary-button"/>
+                </HBox>
+                <TableView fx:id="invoicesTable" VBox.vgrow="ALWAYS" styleClass="small-table">
+                    <columns>
+                        <TableColumn fx:id="invoiceNo" text="Invoice" prefWidth="150"/>
+                        <TableColumn fx:id="invoiceIssued" text="Issued" prefWidth="180"/>
+                        <TableColumn fx:id="invoiceTotal" text="Total" prefWidth="120"/>
+                        <TableColumn fx:id="invoiceBalance" text="Balance" prefWidth="120"/>
+                        <TableColumn fx:id="invoiceStatus" text="Status" prefWidth="110"/>
+                    </columns>
+                </TableView>
+            </VBox>
+        </Tab>
+    </TabPane>
+    <padding>
+        <Insets bottom="4"/>
+    </padding>
+</VBox>
