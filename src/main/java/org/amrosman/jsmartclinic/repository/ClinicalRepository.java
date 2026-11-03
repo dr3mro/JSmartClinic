@@ -186,6 +186,14 @@ public final class ClinicalRepository {
         });
     }
 
+    public Vital findVital(long id) {
+        try (Connection c = database.getConnection()) {
+            return Jdbc.one(c, "SELECT * FROM vitals WHERE id=?", this::vital, id);
+        } catch (SQLException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
     public void removeVital(long id) {
         Jdbc.transaction(database, c -> Jdbc.update(c, "DELETE FROM vitals WHERE id=?", id));
     }
@@ -210,6 +218,14 @@ public final class ClinicalRepository {
         return Jdbc.transaction(database, c -> Jdbc.insert(c,
                 "INSERT INTO encounter_diagnoses(encounter_id, icd10_code, description, is_primary) VALUES (?,?,?,?)",
                 encounterId, code, description, primary));
+    }
+
+    public EncounterDiagnosis findDiagnosis(long id) {
+        try (Connection c = database.getConnection()) {
+            return Jdbc.one(c, "SELECT * FROM encounter_diagnoses WHERE id=?", this::diagnosis, id);
+        } catch (SQLException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     public void removeDiagnosis(long id) {

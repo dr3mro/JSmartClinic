@@ -6,6 +6,7 @@ import org.amrosman.jsmartclinic.db.MigrationRunner;
 import org.amrosman.jsmartclinic.domain.AuditAction;
 import org.amrosman.jsmartclinic.domain.Encounter;
 import org.amrosman.jsmartclinic.domain.Role;
+import org.amrosman.jsmartclinic.domain.Vital;
 import org.amrosman.jsmartclinic.repository.Jdbc;
 import org.amrosman.jsmartclinic.service.Icd10Service;
 import org.junit.jupiter.api.Test;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Path;
 import java.sql.Connection;
+import java.time.Instant;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
@@ -32,7 +34,7 @@ class FoundationTest {
         new MigrationRunner(database).migrate();
 
         try (Connection connection = database.getConnection()) {
-            assertThat(Jdbc.count(connection, "SELECT COUNT(*) FROM schema_version")).isEqualTo(5);
+            assertThat(Jdbc.count(connection, "SELECT COUNT(*) FROM schema_version")).isEqualTo(6);
             assertThat(Jdbc.count(connection, "SELECT COUNT(*) FROM lab_tests")).isEqualTo(17);
             assertThat(Jdbc.count(connection, "SELECT COUNT(*) FROM services")).isEqualTo(8);
             assertThat(Jdbc.count(connection, "SELECT COUNT(*) FROM users")).isZero();
@@ -75,6 +77,9 @@ class FoundationTest {
                 encounter.encounterDate(),
                 "Headache", "", "", "Migraine", "", "{}", encounter.status(), null, null, null, null);
         context.encounters().save(edited);
+        context.encounters().addDiagnosis(encounter.id(), patient.id(), "R51", "Headache", true);
+        long vitalId = context.encounters().addVital(new Vital(0, patient.id(), encounter.id(), Instant.now(),
+                120, 80, 70, 16, 36.8, 98, 70.0, 170.0, null, null, null));
         context.encounters().sign(encounter.id());
 
         assertThatThrownBy(() -> {
@@ -95,6 +100,18 @@ class FoundationTest {
                 Jdbc.update(connection, "DELETE FROM encounters WHERE id=?", encounter.id());
             }
         }).isInstanceOf(SQLException.class).hasMessageContaining("Signed encounters cannot be deleted");
+
+        assertThatThrownBy(() -> {
+            try (Connection connection = context.database().getConnection()) {
+                Jdbc.update(connection, "DELETE FROM encounter_diagnoses WHERE encounter_id=?", encounter.id());
+            }
+        }).isInstanceOf(SQLException.class).hasMessageContaining("immutable");
+
+        assertThatThrownBy(() -> {
+            try (Connection connection = context.database().getConnection()) {
+                Jdbc.update(connection, "DELETE FROM vitals WHERE id=?", vitalId);
+            }
+        }).isInstanceOf(SQLException.class).hasMessageContaining("immutable");
     }
 
     @Test

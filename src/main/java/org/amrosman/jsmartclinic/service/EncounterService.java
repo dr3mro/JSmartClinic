@@ -133,17 +133,28 @@ public final class EncounterService {
     public void addDiagnosis(long encounterId, long patientId, String code, String description, boolean primary) {
         session.require(Permission.ENCOUNTERS);
         Encounter encounter = encounters.findById(encounterId);
-        if (encounter == null || encounter.status() == EncounterStatus.SIGNED) {
+        if (encounter == null || encounter.signedAt() != null) {
             throw new IllegalStateException("Encounter is not editable");
         }
         long id = clinical.addDiagnosis(encounterId, code, description, primary);
-        audit.log(AuditAction.CREATE, "diagnosis", id, patientId, "Diagnosis added");
+        audit.log(AuditAction.CREATE, "diagnosis", id, encounter.patientId(), "Diagnosis added");
     }
 
     public void removeDiagnosis(long diagnosisId, long patientId) {
         session.require(Permission.ENCOUNTERS);
+        EncounterDiagnosis diagnosis = clinical.findDiagnosis(diagnosisId);
+        if (diagnosis == null) {
+            throw new IllegalArgumentException("Diagnosis not found");
+        }
+        Encounter encounter = encounters.findById(diagnosis.encounterId());
+        if (encounter == null) {
+            throw new IllegalStateException("Encounter not found");
+        }
+        if (encounter.signedAt() != null) {
+            throw new IllegalStateException("Signed encounters are read-only");
+        }
         clinical.removeDiagnosis(diagnosisId);
-        audit.log(AuditAction.DELETE, "diagnosis", diagnosisId, patientId, "Diagnosis removed");
+        audit.log(AuditAction.DELETE, "diagnosis", diagnosisId, encounter.patientId(), "Diagnosis removed");
     }
 
     // ---------- Vitals ----------
@@ -169,14 +180,36 @@ public final class EncounterService {
         if (vital.spo2() != null && (vital.spo2() < 40 || vital.spo2() > 100)) {
             throw new IllegalArgumentException("SpO2 must be between 40 and 100");
         }
-        long id = clinical.addVital(vital);
-        audit.log(AuditAction.CREATE, "vital", id, vital.patientId(), "Vitals recorded");
+        Vital stored = vital;
+        if (vital.encounterId() != null) {
+            Encounter encounter = encounters.findById(vital.encounterId());
+            if (encounter == null) {
+                throw new IllegalArgumentException("Encounter not found");
+            }
+            if (encounter.signedAt() != null) {
+                throw new IllegalStateException("Signed encounters are read-only");
+            }
+            stored = new Vital(0, encounter.patientId(), encounter.id(), vital.measuredAt(), vital.systolic(),
+                    vital.diastolic(), vital.heartRate(), vital.respRate(), vital.temperatureC(), vital.spo2(),
+                    vital.weightKg(), vital.heightCm(), vital.glucoseMgdl(), null, null);
+        }
+        long id = clinical.addVital(stored);
+        audit.log(AuditAction.CREATE, "vital", id, stored.patientId(), "Vitals recorded");
         return id;
     }
 
     public void removeVital(long id, long patientId) {
         session.require(Permission.VITALS);
+        Vital vital = clinical.findVital(id);
+        if (vital == null) {
+            throw new IllegalArgumentException("Vital not found");
+        }
+        Encounter encounter = vital.encounterId() == null ? null : encounters.findById(vital.encounterId());
+        if (encounter != null && encounter.signedAt() != null) {
+            throw new IllegalStateException("Signed encounters are read-only");
+        }
         clinical.removeVital(id);
-        audit.log(AuditAction.DELETE, "vital", id, patientId, "Vital removed");
+        long auditPatient = encounter == null ? vital.patientId() : encounter.patientId();
+        audit.log(AuditAction.DELETE, "vital", id, auditPatient, "Vital removed");
     }
 }

@@ -36,7 +36,7 @@ Severity: 🔴 Critical (data loss, safety, or security) · 🟠 High (feature b
   - *Fix:* In `V003`, drop the trigger and recreate it. Block any UPDATE where `OLD.signed_at IS NOT NULL` that changes `chief_complaint, subjective, objective, assessment, plan, template_data, patient_id, provider_id, encounter_date, signed_at, signed_by`. Allow only the status change from `SIGNED` to `AMENDED`. Add a `BEFORE DELETE` trigger that blocks deleting signed rows.
   - *Tests:* Direct JDBC updates and deletes on a signed row must fail.
 
-- [ ] **C-03 🔴 Diagnoses and vitals of signed encounters can still be changed** — `EncounterService.removeDiagnosis`, `removeVital`, `addVital`
+- [x] **C-03 🔴 Diagnoses and vitals of signed encounters can still be changed** — `EncounterService.removeDiagnosis`, `removeVital`, `addVital`
   - *Problem:* `removeDiagnosis` and `removeVital` never check whether the encounter is signed. The `patientId` comes from the caller and is never checked, so the audit entry can name the wrong patient.
   - *Fix:* Load the diagnosis or vital, check its encounter's sign status, and get `patientId` from the database. Add DB triggers that block changes to `encounter_diagnoses` and `vitals` rows whose encounter is signed.
 
@@ -249,3 +249,4 @@ Severity: 🔴 Critical (data loss, safety, or security) · 🟠 High (feature b
 | 2026-11-03 | C-00 | 8bd370d | Added `users.clinician` (V003), clinician-admin permissions, first-run/settings controls, provider lookup, and permission hints. New `ClinicianAdminTest`. |
 | 2026-11-03 | C-01 | 7f2b086 | Added `encounters.amends_encounter_id` (V004); addenda start as editable drafts, `signed()` uses `signed_at`, signing links and locks both notes. Updated encounter tests and UI links. |
 | 2026-11-03 | C-02 | c9f3f45 | Replaced the signed-encounter trigger (V005): signed content and metadata are immutable, only `SIGNED -> AMENDED` is allowed, and signed rows cannot be deleted. Extended JDBC trigger tests. |
+| 2026-11-03 | C-03 | pending | Diagnosis and vital writes now load the stored row, reject signed encounters, derive the audit patient from the database, and are guarded by new triggers (V006). |

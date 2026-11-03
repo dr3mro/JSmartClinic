@@ -3,3 +3,4 @@ V002__seed.sql
 V003__clinician_users.sql
 V004__encounter_addenda.sql
 V005__signed_encounter_guard.sql
+V006__signed_clinical_children.sql

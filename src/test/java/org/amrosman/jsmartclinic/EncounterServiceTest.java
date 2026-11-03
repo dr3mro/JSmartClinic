@@ -132,14 +132,24 @@ class EncounterServiceTest {
         assertThat(diagnoses.get(0).description()).isEqualTo("Headache");
 
         EncounterDiagnosis secondary = diagnoses.stream().filter(d -> !d.primary()).findFirst().orElseThrow();
-        context.encounters().removeDiagnosis(secondary.id(), patient.id());
+        Patient other = TestSupport.createPatient(context, "Otto", "Other");
+        context.encounters().removeDiagnosis(secondary.id(), other.id());
         assertThat(context.encounters().diagnoses(draft.id())).hasSize(1);
+        context.session().login(context.users().byId(1));
+        assertThat(context.audit().recent(10))
+                .anyMatch(e -> e.action() == org.amrosman.jsmartclinic.domain.AuditAction.DELETE
+                        && e.entityId() != null && e.entityId() == secondary.id()
+                        && e.patientId() != null && e.patientId() == patient.id());
+        TestSupport.login(context, "doctor");
 
         context.encounters().sign(draft.id());
         assertThatThrownBy(() -> context.encounters().addDiagnosis(draft.id(), patient.id(), "X", "Nope", false))
                 .isInstanceOf(IllegalStateException.class).hasMessageContaining("not editable");
         assertThatThrownBy(() -> context.encounters().addDiagnosis(999, patient.id(), "X", "Nope", false))
                 .isInstanceOf(IllegalStateException.class);
+        EncounterDiagnosis remaining = context.encounters().diagnoses(draft.id()).get(0);
+        assertThatThrownBy(() -> context.encounters().removeDiagnosis(remaining.id(), patient.id()))
+                .isInstanceOf(IllegalStateException.class).hasMessageContaining("read-only");
     }
 
     @Test
@@ -163,8 +173,24 @@ class EncounterServiceTest {
                 120, 80, null, null, null, 10, null, null, null, null, null)))
                 .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("SpO2");
 
-        context.encounters().removeVital(id, patient.id());
+        Patient other = TestSupport.createPatient(context, "Vera", "Vital");
+        context.encounters().removeVital(id, other.id());
         assertThat(context.encounters().vitalsForEncounter(draft.id())).isEmpty();
+        context.session().login(context.users().byId(1));
+        assertThat(context.audit().recent(10))
+                .anyMatch(e -> e.action() == org.amrosman.jsmartclinic.domain.AuditAction.DELETE
+                        && e.entityId() != null && e.entityId() == id
+                        && e.patientId() != null && e.patientId() == patient.id());
+        TestSupport.login(context, "doctor");
+
+        long secondId = context.encounters().addVital(new Vital(0, patient.id(), draft.id(), Instant.now(),
+                120, 80, 70, 16, 36.8, 98, 70.0, 170.0, null, null, null));
+        context.encounters().sign(draft.id());
+        assertThatThrownBy(() -> context.encounters().removeVital(secondId, patient.id()))
+                .isInstanceOf(IllegalStateException.class).hasMessageContaining("read-only");
+        assertThatThrownBy(() -> context.encounters().addVital(new Vital(0, patient.id(), draft.id(), Instant.now(),
+                120, 80, 70, 16, 36.8, 98, 70.0, 170.0, null, null, null)))
+                .isInstanceOf(IllegalStateException.class).hasMessageContaining("read-only");
     }
 
     @Test
