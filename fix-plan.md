@@ -47,7 +47,7 @@ Severity: 🔴 Critical (data loss, safety, or security) · 🟠 High (feature b
 - [x] **C-05 🟠 Any provider can edit another provider's draft** — `EncounterService.save/sign/deleteDraft`
   - *Fix:* Only the draft's `provider_id` may save, sign or delete it. Add an explicit "take over draft" action, available to DOCTOR and ADMIN, that writes an audit entry.
 
-- [ ] **C-06 🟠 Autosave can silently drop edits** — `EncounterEditorController.persist`
+- [x] **C-06 🟠 Autosave can silently drop edits** — `EncounterEditorController.persist`
   - *Problem:* `dirty=false` is set when a save **finishes**, so anything typed while that save was in flight is never marked unsaved. It is lost if the user then leaves or the session locks.
   - *Fix:* Keep an edit counter. Record it when building the payload, and clear `dirty` only if the counter hasn't changed since.
 
@@ -252,3 +252,4 @@ Severity: 🔴 Critical (data loss, safety, or security) · 🟠 High (feature b
 | 2026-11-03 | C-03 | 52feecb | Diagnosis and vital writes now load the stored row, reject signed encounters, derive the audit patient from the database, and are guarded by new triggers (V006). |
 | 2026-11-03 | C-04 | 040972f | Signing now uses `isBlank()` and requires a chief complaint or a non-blank assessment/plan. Added an empty/whitespace signing test. |
 | 2026-11-03 | C-05 | 9ac80c7 | Save/sign/delete now require the draft's provider; added audited `takeOverDraft()` for doctors/admins and a "Take over draft" editor action. |
+| 2026-11-03 | C-06 | pending | Added an editor change counter; autosave clears the dirty flag only when no edits arrived while the save was in flight. |

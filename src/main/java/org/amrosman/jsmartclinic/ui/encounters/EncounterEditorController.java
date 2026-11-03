@@ -98,6 +98,7 @@ public class EncounterEditorController implements ContextAware, Navigator.ParamA
     private boolean dirty;
     private boolean saving;
     private boolean editable;
+    private long editVersion;
 
     @Override
     public void init(AppContext context) {
@@ -407,6 +408,7 @@ public class EncounterEditorController implements ContextAware, Navigator.ParamA
             return;
         }
         dirty = true;
+        editVersion++;
         autosaveLabel.setText("Unsaved changes");
     }
 
@@ -429,12 +431,18 @@ public class EncounterEditorController implements ContextAware, Navigator.ParamA
         saving = true;
         updateButtons();
         Encounter updated = buildEncounter();
+        long versionAtBuild = editVersion;
         Async.run(() -> context.encounters().save(updated), saved -> {
             base = saved;
-            dirty = false;
             saving = false;
-            autosaveLabel.setText((silent ? "Autosaved " : "Saved ")
-                    + LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
+            if (editVersion == versionAtBuild) {
+                dirty = false;
+                autosaveLabel.setText((silent ? "Autosaved " : "Saved ")
+                        + LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
+            } else {
+                dirty = true;
+                autosaveLabel.setText("Unsaved changes");
+            }
             updateButtons();
             if (!silent) {
                 Toasts.success("Encounter saved");
