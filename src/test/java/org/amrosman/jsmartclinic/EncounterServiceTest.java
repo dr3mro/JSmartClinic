@@ -107,6 +107,23 @@ class EncounterServiceTest {
     }
 
     @Test
+    void emptyOrWhitespaceEncountersCannotBeSigned() {
+        Encounter draft = context.encounters().start(patient.id(), null, null, null);
+        assertThatThrownBy(() -> context.encounters().sign(draft.id()))
+                .isInstanceOf(IllegalStateException.class).hasMessageContaining("clinical content");
+
+        Encounter whitespace = context.encounters().save(TestSupport.withContent(draft,
+                "   ", " ", "\t", "", ""));
+        assertThatThrownBy(() -> context.encounters().sign(whitespace.id()))
+                .isInstanceOf(IllegalStateException.class).hasMessageContaining("clinical content");
+
+        Encounter assessmentOnly = context.encounters().save(TestSupport.withContent(whitespace,
+                "", "", "", "Migraine", ""));
+        Encounter signed = context.encounters().sign(assessmentOnly.id());
+        assertThat(signed.status()).isEqualTo(EncounterStatus.SIGNED);
+    }
+
+    @Test
     void deleteDraftOnlyRemovesUnsignedNotes() {
         Encounter draft = context.encounters().start(patient.id(), null, null, null);
         Encounter saved = context.encounters().save(TestSupport.withContent(draft, "Cough", "", "", "Cold", ""));
@@ -142,6 +159,7 @@ class EncounterServiceTest {
                         && e.patientId() != null && e.patientId() == patient.id());
         TestSupport.login(context, "doctor");
 
+        context.encounters().save(TestSupport.withContent(draft, "Headache", "", "", "Migraine", ""));
         context.encounters().sign(draft.id());
         assertThatThrownBy(() -> context.encounters().addDiagnosis(draft.id(), patient.id(), "X", "Nope", false))
                 .isInstanceOf(IllegalStateException.class).hasMessageContaining("not editable");
@@ -185,6 +203,7 @@ class EncounterServiceTest {
 
         long secondId = context.encounters().addVital(new Vital(0, patient.id(), draft.id(), Instant.now(),
                 120, 80, 70, 16, 36.8, 98, 70.0, 170.0, null, null, null));
+        context.encounters().save(TestSupport.withContent(draft, "Vitals review", "", "", "", ""));
         context.encounters().sign(draft.id());
         assertThatThrownBy(() -> context.encounters().removeVital(secondId, patient.id()))
                 .isInstanceOf(IllegalStateException.class).hasMessageContaining("read-only");

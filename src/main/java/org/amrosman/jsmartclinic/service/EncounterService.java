@@ -87,7 +87,10 @@ public final class EncounterService {
         if (encounter.signedAt() != null) {
             throw new IllegalStateException("Encounter is already signed");
         }
-        if (encounter.chiefComplaint() == null && encounter.assessment() == null && encounter.plan() == null) {
+        boolean hasChiefComplaint = encounter.chiefComplaint() != null && !encounter.chiefComplaint().isBlank();
+        boolean hasAssessmentOrPlan = (encounter.assessment() != null && !encounter.assessment().isBlank())
+                || (encounter.plan() != null && !encounter.plan().isBlank());
+        if (!hasChiefComplaint && !hasAssessmentOrPlan) {
             throw new IllegalStateException("Add clinical content before signing");
         }
         encounters.sign(encounterId, session.userId(), EncounterStatus.SIGNED);
