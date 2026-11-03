@@ -44,6 +44,15 @@ public final class Dialogs {
         return result.isPresent() && result.get() == ButtonType.OK;
     }
 
+    /** Shows a confirmation dialog with caller-defined buttons. */
+    public static Optional<ButtonType> choose(String title, String message, ButtonType... buttons) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, message, buttons);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        style(alert);
+        return alert.showAndWait();
+    }
+
     public static void openFile(Path path) {
         try {
             if (Desktop.isDesktopSupported()) {

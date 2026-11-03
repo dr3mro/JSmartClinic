@@ -224,12 +224,14 @@ public class MainController implements ContextAware {
 
     @FXML
     private void onLogout() {
-        if (!Dialogs.confirm("Sign out", "Sign out of JSmartClinic?")) {
-            return;
-        }
-        context.navigator().clearCache();
-        context.auth().logout();
-        onLogout.run();
+        context.navigator().leaveCurrent(true, () -> {
+            if (!Dialogs.confirm("Sign out", "Sign out of JSmartClinic?")) {
+                return;
+            }
+            context.navigator().clearCache();
+            context.auth().logout();
+            onLogout.run();
+        });
     }
 
     @FXML
@@ -294,6 +296,11 @@ public class MainController implements ContextAware {
             return;
         }
         lockShowing = true;
+        // Save any in-progress draft first, but never make an automatic lock wait for a prompt.
+        context.navigator().leaveCurrent(false, this::openLockDialog);
+    }
+
+    private void openLockDialog() {
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setTitle("Session locked");
         dialog.setHeaderText("Your session was locked after 10 minutes of inactivity.\nRe-enter your password to continue.");

@@ -51,7 +51,7 @@ Severity: 🔴 Critical (data loss, safety, or security) · 🟠 High (feature b
   - *Problem:* `dirty=false` is set when a save **finishes**, so anything typed while that save was in flight is never marked unsaved. It is lost if the user then leaves or the session locks.
   - *Fix:* Keep an edit counter. Record it when building the payload, and clear `dirty` only if the counter hasn't changed since.
 
-- [ ] **C-07 🟠 Leaving the editor from the sidebar or the lock screen discards unsaved changes**
+- [x] **C-07 🟠 Leaving the editor from the sidebar or the lock screen discards unsaved changes**
   - *Problem:* Only `onBack()` asks for confirmation. Sidebar navigation, global search, logout and the inactivity lock all drop the draft without asking.
   - *Fix:* Add a `Navigator.CanLeave` interface that `EncounterEditorController` implements. It saves silently, or asks first. `Navigator.show()` and `MainController` (logout and lock) must call it before switching views.
 
@@ -253,3 +253,4 @@ Severity: 🔴 Critical (data loss, safety, or security) · 🟠 High (feature b
 | 2026-11-03 | C-04 | 040972f | Signing now uses `isBlank()` and requires a chief complaint or a non-blank assessment/plan. Added an empty/whitespace signing test. |
 | 2026-11-03 | C-05 | 9ac80c7 | Save/sign/delete now require the draft's provider; added audited `takeOverDraft()` for doctors/admins and a "Take over draft" editor action. |
 | 2026-11-03 | C-06 | a1cc44f | Added an editor change counter; autosave clears the dirty flag only when no edits arrived while the save was in flight. |
+| 2026-11-03 | C-07 | pending | Added `Navigator.CanLeave`; navigation, logout and lock now ask the editor to save/confirm first. Automatic locks save silently and never wait for a prompt. New `NavigationGuardTest`. |

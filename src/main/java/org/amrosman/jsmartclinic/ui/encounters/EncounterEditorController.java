@@ -5,6 +5,8 @@ import javafx.animation.Timeline;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Control;
@@ -44,9 +46,11 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.Consumer;
 
 /** SOAP encounter editor with specialty templates, diagnoses, vitals and autosave. */
-public class EncounterEditorController implements ContextAware, Navigator.ParamAware {
+public class EncounterEditorController implements ContextAware, Navigator.ParamAware, Navigator.CanLeave {
 
     @FXML private Label avatarLabel;
     @FXML private Label patientName;
@@ -99,6 +103,7 @@ public class EncounterEditorController implements ContextAware, Navigator.ParamA
     private boolean saving;
     private boolean editable;
     private long editVersion;
+    private Runnable leaveAfterSave;
 
     @Override
     public void init(AppContext context) {
@@ -424,8 +429,75 @@ public class EncounterEditorController implements ContextAware, Navigator.ParamA
         persist(false);
     }
 
+    @Override
+    public void confirmLeave(boolean interactive, Runnable proceed) {
+        if (!dirty || !editable || base == null) {
+            leaveNow(proceed);
+            return;
+        }
+        if (saving) {
+            leaveAfterSave = () -> confirmLeave(interactive, proceed);
+            return;
+        }
+        if (!interactive) {
+            // An automatic lock must not wait for a dialog; save and lock either way.
+            saveThenLeave(proceed, true);
+            return;
+        }
+        ButtonType save = new ButtonType("Save and leave", ButtonBar.ButtonData.YES);
+        ButtonType discard = new ButtonType("Discard changes", ButtonBar.ButtonData.NO);
+        ButtonType cancel = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+        Optional<ButtonType> choice = Dialogs.choose("Unsaved changes",
+                "Save your changes before leaving the encounter?", save, discard, cancel);
+        if (choice.isEmpty() || choice.get() == cancel) {
+            return;
+        }
+        if (choice.get() == discard) {
+            dirty = false;
+            leaveNow(proceed);
+            return;
+        }
+        saveThenLeave(proceed, false);
+    }
+
+    private void saveThenLeave(Runnable proceed, boolean proceedOnFailure) {
+        persist(true, () -> {
+            if (dirty) {
+                saveThenLeave(proceed, proceedOnFailure);
+            } else {
+                leaveNow(proceed);
+            }
+        }, error -> {
+            if (proceedOnFailure) {
+                leaveNow(proceed);
+            } else {
+                Dialogs.error(error);
+            }
+        });
+    }
+
+    private void leaveNow(Runnable proceed) {
+        autosave.stop();
+        proceed.run();
+    }
+
+    private void runPendingLeave() {
+        Runnable pending = leaveAfterSave;
+        leaveAfterSave = null;
+        if (pending != null) {
+            pending.run();
+        }
+    }
+
     private void persist(boolean silent) {
+        persist(silent, null, null);
+    }
+
+    private void persist(boolean silent, Runnable onSaved, Consumer<Throwable> onFailed) {
         if (base == null || !editable) {
+            if (onFailed != null) {
+                onFailed.accept(new IllegalStateException("This encounter is read-only"));
+            }
             return;
         }
         saving = true;
@@ -447,13 +519,20 @@ public class EncounterEditorController implements ContextAware, Navigator.ParamA
             if (!silent) {
                 Toasts.success("Encounter saved");
             }
+            if (onSaved != null) {
+                onSaved.run();
+            }
+            runPendingLeave();
         }, throwable -> {
             saving = false;
             autosaveLabel.setText("Save failed");
             updateButtons();
-            if (!silent) {
+            if (onFailed != null) {
+                onFailed.accept(throwable);
+            } else if (!silent) {
                 Dialogs.error(throwable);
             }
+            runPendingLeave();
         });
     }
 
@@ -487,10 +566,12 @@ public class EncounterEditorController implements ContextAware, Navigator.ParamA
             dirty = false;
             Toasts.success("Encounter signed");
             load();
+            runPendingLeave();
         }, throwable -> {
             saving = false;
             updateButtons();
             Dialogs.error(throwable);
+            runPendingLeave();
         });
     }
 
@@ -602,10 +683,7 @@ public class EncounterEditorController implements ContextAware, Navigator.ParamA
 
     @FXML
     private void onBack() {
-        if (dirty && !Dialogs.confirm("Unsaved changes", "Discard unsaved changes and leave the editor?")) {
-            return;
-        }
-        autosave.stop();
+        // Navigator.show() asks this controller to save or confirm before switching views.
         if (patient != null) {
             context.navigator().show("patient-chart", patient.id());
         } else {

@@ -22,6 +22,19 @@ public final class Navigator {
         void refresh();
     }
 
+    /**
+     * Optional controller contract for views that may hold unsaved work. Navigation is paused
+     * until the view calls {@code proceed}.
+     */
+    public interface CanLeave {
+        /**
+         * @param interactive {@code true} when the user can be asked what to do with unsaved
+         *                    changes; {@code false} for automatic locks, which must not wait
+         * @param proceed     run when it is safe to switch away from the view
+         */
+        void confirmLeave(boolean interactive, Runnable proceed);
+    }
+
     private final AppContext context;
     private final Map<String, Parent> cache = new HashMap<>();
     private final Map<String, String> routes = new HashMap<>();
@@ -64,6 +77,10 @@ public final class Navigator {
         if (route == null) {
             throw new IllegalArgumentException("Unknown view: " + key);
         }
+        leaveCurrent(true, () -> showNow(key, param, route));
+    }
+
+    private void showNow(String key, Object param, String route) {
         Parent view = cache.get(key);
         if (param != null || view == null) {
             try {
@@ -93,6 +110,24 @@ public final class Navigator {
         }
         content.getChildren().setAll(view);
         onNavigate.accept(key);
+    }
+
+    /** Asks the current view to save or confirm before the caller switches away from it. */
+    public void leaveCurrent(boolean interactive, Runnable proceed) {
+        Object controller = null;
+        if (content != null && !content.getChildren().isEmpty()
+                && content.getChildren().get(0) instanceof Parent view) {
+            controller = view.getProperties().get("controller");
+        }
+        requestLeave(controller, interactive, proceed);
+    }
+
+    static void requestLeave(Object controller, boolean interactive, Runnable proceed) {
+        if (controller instanceof CanLeave guard) {
+            guard.confirmLeave(interactive, proceed);
+        } else {
+            proceed.run();
+        }
     }
 
     public void refresh(String key) {
