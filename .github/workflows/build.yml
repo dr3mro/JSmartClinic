@@ -182,7 +182,11 @@ jobs:
           # so ship the JDK's own jmods plus the JavaFX jmods next to it.
           if [ ! -d "$JAVA_HOME/jmods" ]; then echo "::error::$JAVA_HOME has no jmods folder"; exit 1; fi
           mkdir -p "$RUNNER_TEMP/jdk-fx/jmods"
-          cp "$JAVA_HOME"/jmods/*.jmod jfx/build/jmods/*.jmod "$RUNNER_TEMP/jdk-fx/jmods/"
+          cp "$JAVA_HOME"/jmods/*.jmod "$RUNNER_TEMP/jdk-fx/jmods/"
+          # Both ship jdk.jsobject: keep the JDK's copy, add only the modules it lacks.
+          for m in jfx/build/jmods/*.jmod; do
+            [ -e "$RUNNER_TEMP/jdk-fx/jmods/$(basename "$m")" ] || cp "$m" "$RUNNER_TEMP/jdk-fx/jmods/"
+          done
           ls "$RUNNER_TEMP/jdk-fx/jmods" | grep -E "java.base|javafx"
           echo "JAVA_HOME=$RUNNER_TEMP/jdk-fx" >> "$GITHUB_ENV"
           echo "$RUNNER_TEMP/jdk-fx/bin" >> "$GITHUB_PATH"
