@@ -230,6 +230,20 @@
                 <jpackage.fx.modules>javafx.controls,javafx.fxml</jpackage.fx.modules>
                 <package.exclude.groups>org.openjfx</package.exclude.groups>
             </properties>
+            <build>
+                <plugins>
+                    <!-- '-release 21' compiles against the standard Java 21 API only, which hides
+                         JavaFX modules that live inside the JDK. Use source/target instead. -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <configuration combine.self="override">
+                            <source>21</source>
+                            <target>21</target>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
         <profile>
             <id>package-mac</id>
