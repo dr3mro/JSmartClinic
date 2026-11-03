@@ -253,4 +253,4 @@ Severity: 🔴 Critical (data loss, safety, or security) · 🟠 High (feature b
 | 2026-11-03 | C-04 | 040972f | Signing now uses `isBlank()` and requires a chief complaint or a non-blank assessment/plan. Added an empty/whitespace signing test. |
 | 2026-11-03 | C-05 | 9ac80c7 | Save/sign/delete now require the draft's provider; added audited `takeOverDraft()` for doctors/admins and a "Take over draft" editor action. |
 | 2026-11-03 | C-06 | a1cc44f | Added an editor change counter; autosave clears the dirty flag only when no edits arrived while the save was in flight. |
-| 2026-11-03 | C-07 | pending | Added `Navigator.CanLeave`; navigation, logout and lock now ask the editor to save/confirm first. Automatic locks save silently and never wait for a prompt. New `NavigationGuardTest`. |
+| 2026-11-03 | C-07 | 33c889e | Added `Navigator.CanLeave`; navigation, logout and lock now ask the editor to save/confirm first. Automatic locks save silently and never wait for a prompt. New `NavigationGuardTest`. |
