@@ -32,7 +32,7 @@ class FoundationTest {
         new MigrationRunner(database).migrate();
 
         try (Connection connection = database.getConnection()) {
-            assertThat(Jdbc.count(connection, "SELECT COUNT(*) FROM schema_version")).isEqualTo(3);
+            assertThat(Jdbc.count(connection, "SELECT COUNT(*) FROM schema_version")).isEqualTo(4);
             assertThat(Jdbc.count(connection, "SELECT COUNT(*) FROM lab_tests")).isEqualTo(17);
             assertThat(Jdbc.count(connection, "SELECT COUNT(*) FROM services")).isEqualTo(8);
             assertThat(Jdbc.count(connection, "SELECT COUNT(*) FROM users")).isZero();
@@ -71,7 +71,8 @@ class FoundationTest {
         var patient = TestSupport.createPatient(context, "Jane", "Doe");
         Encounter encounter = context.encounters().start(patient.id(), null, null, null);
         Encounter edited = new Encounter(encounter.id(), encounter.patientId(), encounter.providerId(),
-                encounter.appointmentId(), encounter.specialty(), encounter.templateId(), encounter.encounterDate(),
+                encounter.appointmentId(), null, encounter.specialty(), encounter.templateId(),
+                encounter.encounterDate(),
                 "Headache", "", "", "Migraine", "", "{}", encounter.status(), null, null, null, null);
         context.encounters().save(edited);
         context.encounters().sign(encounter.id());

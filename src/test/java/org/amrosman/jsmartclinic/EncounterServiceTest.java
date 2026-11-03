@@ -74,16 +74,27 @@ class EncounterServiceTest {
 
         Encounter amendment = context.encounters().amend(signed.id());
         assertThat(amendment.id()).isNotEqualTo(signed.id());
-        assertThat(amendment.status()).isEqualTo(EncounterStatus.AMENDED);
+        assertThat(amendment.status()).isEqualTo(EncounterStatus.DRAFT);
         assertThat(amendment.chiefComplaint()).isEqualTo("Headache");
-        assertThat(amendment.signed()).isTrue();
+        assertThat(amendment.signed()).isFalse();
+        assertThat(amendment.signedAt()).isNull();
+        assertThat(amendment.amendsEncounterId()).isEqualTo(signed.id());
         assertThat(context.encounters().byId(signed.id()).status()).isEqualTo(EncounterStatus.SIGNED);
 
         Encounter edited = context.encounters().save(TestSupport.withContent(amendment, "Headache",
                 "Addendum details", "BP normal", "Migraine", "Follow up"));
         assertThat(edited.subjective()).isEqualTo("Addendum details");
         Encounter reSigned = context.encounters().sign(amendment.id());
-        assertThat(reSigned.status()).isEqualTo(EncounterStatus.AMENDED);
+        assertThat(reSigned.status()).isEqualTo(EncounterStatus.SIGNED);
+        assertThat(reSigned.amendsEncounterId()).isEqualTo(signed.id());
+
+        Encounter originalAfterSign = context.encounters().byId(signed.id());
+        assertThat(originalAfterSign.status()).isEqualTo(EncounterStatus.AMENDED);
+        assertThat(originalAfterSign.chiefComplaint()).isEqualTo("Headache");
+        assertThat(originalAfterSign.subjective()).isEqualTo("Two days of pain");
+        assertThatThrownBy(() -> context.encounters().save(TestSupport.withContent(reSigned, "Changed",
+                null, null, null, null)))
+                .isInstanceOf(IllegalStateException.class).hasMessageContaining("read-only");
 
         Encounter draft2 = context.encounters().start(TestSupport.createPatient(context, "Owen", "Oak").id(),
                 null, null, null);

@@ -9,6 +9,7 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Control;
 import javafx.scene.control.DatePicker;
+import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -52,6 +53,7 @@ public class EncounterEditorController implements ContextAware, Navigator.ParamA
     @FXML private Label patientMeta;
     @FXML private Label encounterDateLabel;
     @FXML private Label statusLabel;
+    @FXML private Hyperlink addendumLink;
     @FXML private Label signedBanner;
     @FXML private Label autosaveLabel;
     @FXML private TextField chiefComplaint;
@@ -218,6 +220,10 @@ public class EncounterEditorController implements ContextAware, Navigator.ParamA
         encounterDateLabel.setText(Dates.display(base.encounterDate()));
         statusLabel.setText(base.status().name());
         statusLabel.getStyleClass().setAll("badge", "badge-" + Ui.css(base.status().name()));
+        boolean isAddendum = base.amendsEncounterId() != null;
+        addendumLink.setText(isAddendum ? "Addendum to encounter #" + base.amendsEncounterId() : "");
+        addendumLink.setVisible(isAddendum);
+        addendumLink.setManaged(isAddendum);
         if (base.signed()) {
             signedBanner.setText("This encounter was signed " + Dates.display(base.signedAt())
                     + ". It is read-only; use \"Create addendum\" to document changes.");
@@ -437,7 +443,7 @@ public class EncounterEditorController implements ContextAware, Navigator.ParamA
 
     private Encounter buildEncounter() {
         return new Encounter(base.id(), base.patientId(), base.providerId(), base.appointmentId(),
-                base.specialty(),
+                base.amendsEncounterId(), base.specialty(),
                 templateCombo.getSelectionModel().getSelectedItem() == null ? base.templateId()
                         : templateCombo.getSelectionModel().getSelectedItem().id(),
                 base.encounterDate(), chiefComplaint.getText(), subjective.getText(), objective.getText(),
@@ -486,6 +492,13 @@ public class EncounterEditorController implements ContextAware, Navigator.ParamA
             Toasts.success("Addendum created");
             context.navigator().show("encounter-editor", amendment.id());
         });
+    }
+
+    @FXML
+    private void onOpenOriginal() {
+        if (base != null && base.amendsEncounterId() != null) {
+            context.navigator().show("encounter-editor", base.amendsEncounterId());
+        }
     }
 
     @FXML

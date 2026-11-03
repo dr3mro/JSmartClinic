@@ -91,6 +91,7 @@
                         <TableColumn fx:id="encounterSpecialty" text="Specialty" prefWidth="160"/>
                         <TableColumn fx:id="encounterTemplate" text="Template" prefWidth="150"/>
                         <TableColumn fx:id="encounterStatus" text="Status" prefWidth="120"/>
+                        <TableColumn fx:id="encounterAddendum" text="Addendum" prefWidth="160"/>
                         <TableColumn fx:id="encounterSigned" text="Signed" prefWidth="180"/>
                     </columns>
                 </TableView>

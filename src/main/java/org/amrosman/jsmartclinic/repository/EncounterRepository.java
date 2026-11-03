@@ -20,7 +20,8 @@ public final class EncounterRepository {
 
     private Encounter map(ResultSet rs) throws SQLException {
         return new Encounter(rs.getLong("id"), rs.getLong("patient_id"), rs.getLong("provider_id"),
-                Jdbc.nullableLong(rs, "appointment_id"), rs.getString("specialty"), rs.getString("template_id"),
+                Jdbc.nullableLong(rs, "appointment_id"), Jdbc.nullableLong(rs, "amends_encounter_id"),
+                rs.getString("specialty"), rs.getString("template_id"),
                 Jdbc.instant(rs, "encounter_date"), rs.getString("chief_complaint"), rs.getString("subjective"),
                 rs.getString("objective"), rs.getString("assessment"), rs.getString("plan"),
                 rs.getString("template_data"), EncounterStatus.from(rs.getString("status")),
@@ -91,15 +92,23 @@ public final class EncounterRepository {
     public long insertAmendment(Encounter original, long providerId) {
         return Jdbc.transaction(database, c -> {
             Instant now = Instant.now();
-            return Jdbc.insert(c, "INSERT INTO encounters(patient_id, provider_id, appointment_id, specialty, "
-                            + "template_id, encounter_date, chief_complaint, subjective, objective, assessment, plan, "
-                            + "template_data, status, signed_at, signed_by, created_at, updated_at) "
-                            + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                    original.patientId(), providerId, original.appointmentId(), original.specialty(),
-                    original.templateId(), now, original.chiefComplaint(), original.subjective(),
-                    original.objective(), original.assessment(), original.plan(), original.templateData(),
-                    EncounterStatus.AMENDED.name(), now, providerId, now, now);
+            return Jdbc.insert(c, "INSERT INTO encounters(patient_id, provider_id, appointment_id, "
+                            + "amends_encounter_id, specialty, template_id, encounter_date, chief_complaint, "
+                            + "subjective, objective, assessment, plan, template_data, status, signed_at, "
+                            + "signed_by, created_at, updated_at) "
+                            + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,'DRAFT',NULL,NULL,?,?)",
+                    original.patientId(), providerId, original.appointmentId(), original.id(),
+                    original.specialty(), original.templateId(), now, original.chiefComplaint(),
+                    original.subjective(), original.objective(), original.assessment(), original.plan(),
+                    original.templateData(), now, now);
         });
+    }
+
+    /** Marks the original signed note as amended without touching its content. */
+    public void markAmended(long originalId) {
+        Jdbc.transaction(database, c -> Jdbc.update(c,
+                "UPDATE encounters SET status='AMENDED', updated_at=? WHERE id=?",
+                Instant.now(), originalId));
     }
 
     public void deleteDraft(long id) {

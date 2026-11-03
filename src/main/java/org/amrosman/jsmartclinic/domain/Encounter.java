@@ -7,6 +7,7 @@ public record Encounter(
         long patientId,
         long providerId,
         Long appointmentId,
+        Long amendsEncounterId,
         String specialty,
         String templateId,
         Instant encounterDate,
@@ -23,6 +24,6 @@ public record Encounter(
         Instant updatedAt) {
 
     public boolean signed() {
-        return status == EncounterStatus.SIGNED || status == EncounterStatus.AMENDED;
+        return signedAt != null;
     }
 }

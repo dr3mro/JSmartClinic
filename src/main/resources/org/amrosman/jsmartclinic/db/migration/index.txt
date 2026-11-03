@@ -1,3 +1,4 @@
 V001__init.sql
 V002__seed.sql
 V003__clinician_users.sql
+V004__encounter_addenda.sql

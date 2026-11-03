@@ -55,7 +55,7 @@ public final class EncounterService {
         String templateValue = templateId == null || templateId.isBlank()
                 ? templates.defaultFor(specialtyValue).map(TemplateService.Template::id).orElse(null)
                 : templateId;
-        long id = encounters.insert(new Encounter(0, patientId, session.userId(), appointmentId, specialtyValue,
+        long id = encounters.insert(new Encounter(0, patientId, session.userId(), appointmentId, null, specialtyValue,
                 templateValue, Instant.now(), "", "", "", "", "", "{}", EncounterStatus.DRAFT, null, null, null, null));
         audit.log(AuditAction.CREATE, "encounter", id, patientId, "Encounter started");
         return encounters.findById(id);
@@ -67,7 +67,7 @@ public final class EncounterService {
         if (existing == null) {
             throw new IllegalArgumentException("Encounter not found");
         }
-        if (existing.status() == EncounterStatus.SIGNED) {
+        if (existing.signedAt() != null) {
             throw new IllegalStateException("Signed encounters are read-only. Create an addendum instead.");
         }
         if (encounter.chiefComplaint() == null || encounter.subjective() == null || encounter.objective() == null
@@ -84,14 +84,16 @@ public final class EncounterService {
         if (encounter == null) {
             throw new IllegalArgumentException("Encounter not found");
         }
-        if (encounter.status() == EncounterStatus.SIGNED) {
+        if (encounter.signedAt() != null) {
             throw new IllegalStateException("Encounter is already signed");
         }
         if (encounter.chiefComplaint() == null && encounter.assessment() == null && encounter.plan() == null) {
             throw new IllegalStateException("Add clinical content before signing");
         }
-        encounters.sign(encounterId, session.userId(),
-                encounter.status() == EncounterStatus.AMENDED ? EncounterStatus.AMENDED : EncounterStatus.SIGNED);
+        encounters.sign(encounterId, session.userId(), EncounterStatus.SIGNED);
+        if (encounter.amendsEncounterId() != null) {
+            encounters.markAmended(encounter.amendsEncounterId());
+        }
         audit.log(AuditAction.UPDATE, "encounter", encounterId, encounter.patientId(), "Encounter signed");
         return encounters.findById(encounterId);
     }

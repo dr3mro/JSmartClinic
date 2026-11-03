@@ -93,6 +93,7 @@ public class PatientChartController implements ContextAware, Navigator.ParamAwar
     @javafx.fxml.FXML private TableColumn<Encounter, String> encounterSpecialty;
     @javafx.fxml.FXML private TableColumn<Encounter, String> encounterTemplate;
     @javafx.fxml.FXML private TableColumn<Encounter, String> encounterStatus;
+    @javafx.fxml.FXML private TableColumn<Encounter, String> encounterAddendum;
     @javafx.fxml.FXML private TableColumn<Encounter, String> encounterSigned;
 
     // Problems
@@ -191,6 +192,7 @@ public class PatientChartController implements ContextAware, Navigator.ParamAwar
         column(encounterTemplate, e -> nz(e.templateId()));
         column(encounterStatus, e -> e.status().name());
         encounterStatus.setCellFactory(Ui.badgeCell());
+        column(encounterAddendum, e -> e.amendsEncounterId() == null ? "—" : "Addendum to #" + e.amendsEncounterId());
         column(encounterSigned, e -> e.signedAt() == null ? "—" : Dates.display(e.signedAt()));
         encountersTable.setPlaceholder(Ui.emptyState("No encounters", "Start a new encounter to document this visit"));
         encountersTable.setOnMouseClicked(event -> {

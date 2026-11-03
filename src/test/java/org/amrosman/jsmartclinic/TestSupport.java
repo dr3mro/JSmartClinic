@@ -87,9 +87,10 @@ public final class TestSupport {
 
     public static Encounter withContent(Encounter e, String chiefComplaint, String subjective, String objective,
                                         String assessment, String plan) {
-        return new Encounter(e.id(), e.patientId(), e.providerId(), e.appointmentId(), e.specialty(),
-                e.templateId(), e.encounterDate(), chiefComplaint, subjective, objective, assessment, plan,
-                e.templateData(), e.status(), e.signedAt(), e.signedBy(), e.createdAt(), e.updatedAt());
+        return new Encounter(e.id(), e.patientId(), e.providerId(), e.appointmentId(), e.amendsEncounterId(),
+                e.specialty(), e.templateId(), e.encounterDate(), chiefComplaint, subjective, objective,
+                assessment, plan, e.templateData(), e.status(), e.signedAt(), e.signedBy(), e.createdAt(),
+                e.updatedAt());
     }
 
     public static Patient withPhoto(Patient p, byte[] photo) {
