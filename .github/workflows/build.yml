@@ -34,21 +34,17 @@ jobs:
             distribution: temurin
             java-package: jdk
             fx: ""
-          # No official JavaFX for Windows ARM64 on Maven Central, so use Azul Zulu JDK FX
-          # (JavaFX bundled in the JDK) and skip the Maven JavaFX jars.
-          - os: windows-11-arm
-            profile: package-win
-            label: Windows-arm64
-            distribution: zulu
-            java-package: jdk+fx
-            fx: "-Djavafx.bundled=true"
+          # Windows ARM64 is not built: neither Maven Central nor Azul publishes JavaFX for
+          # win-aarch64 (checked 2026-11-03). The x64 installer runs on Windows ARM via emulation.
+          # When a JDK with JavaFX for win-aarch64 exists, add an entry with os: windows-11-arm
+          # and fx: "-Djavafx.bundled=true" (the pom already supports it).
 
     steps:
       - name: Check out
         uses: actions/checkout@v4
 
       - name: Set up JDK 25
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: ${{ matrix.distribution }}
           java-package: ${{ matrix.java-package }}
