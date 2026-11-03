@@ -416,3 +416,18 @@
 .small-table .table-row-cell { -fx-cell-size: 36; }
 .small-table .column-header, .small-table .filler { -fx-size: 32; }
 .danger-zone { -fx-background-color: #fff1f2; -fx-background-radius: 10; -fx-padding: 14; -fx-spacing: 8; }
+
+/* Login/first-run brand: dark text on the light auth card */
+.auth-brand .brand { -fx-text-fill: #0f172a; }
+.auth-brand .brand-accent { -fx-text-fill: #0d9488; }
+
+/* ===== Light-theme contrast fixes (V-17) ===== */
+.root { -fx-prompt-text-fill: #94a3b8; }
+.section-label { -fx-text-fill: #64748b; }          /* 4.8:1 on white, compared with 2.6:1 before */
+.primary-button { -fx-background-color: #0f766e; }  /* white text 5.5:1 */
+.primary-button:hover { -fx-background-color: #115e59; }
+
+/* Responsive dialog forms */
+.dialog-scroll, .dialog-scroll > .viewport { -fx-background-color: transparent; -fx-background: transparent; -fx-padding: 0; }
+.dialog-scroll { -fx-border-color: transparent; }
+.form-section { -fx-padding: 0 6 4 0; }

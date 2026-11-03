@@ -103,3 +103,63 @@
 .badge-void, .badge-no-show, .badge-archived, .badge-resolved { -fx-background-color: #1e293b; -fx-text-fill: #cbd5e1; }
 .chart-header .avatar, .avatar { -fx-background-color: linear-gradient(to bottom right, #0d9488, #075985); }
 .scroll-bar .thumb { -fx-background-color: #334155; }
+
+/* Login/first-run brand: dark text on the light auth card */
+.auth-brand .brand { -fx-text-fill: #0f172a; }
+.auth-brand .brand-accent { -fx-text-fill: #0d9488; }
+
+/* ===== Dark-theme colour fixes (V-17) =====
+   main-view.fxml attaches app.css at node level, which outranks scene stylesheets,
+   so the overrides below use !important until ThemeManager is fixed. */
+.root {
+    -fx-control-inner-background: #0b1220;
+    -fx-control-inner-background-alt: #0e1626;
+    -fx-prompt-text-fill: #64748b;
+    -fx-accent: #0f766e;
+    -fx-focus-color: #14b8a6;
+    -fx-faint-focus-color: transparent;
+}
+.text-area .content,
+.text-area.form-field .content,
+.text-area .scroll-pane,
+.text-area .scroll-pane > .viewport { -fx-background-color: #0b1220 !important; }
+.text-area { -fx-text-fill: #e2e8f0 !important; -fx-highlight-fill: #0f766e; -fx-highlight-text-fill: white; }
+.date-picker .text-field,
+.date-picker.form-field .text-field {
+    -fx-background-color: #0b1220 !important;
+    -fx-text-fill: #e2e8f0 !important;
+}
+.date-picker { -fx-background-color: #0b1220 !important; -fx-border-color: #1e293b; }
+.date-picker .arrow-button { -fx-background-color: #142033 !important; }
+.date-picker .arrow { -fx-background-color: #94a3b8; }
+.text-field, .password-field, .text-area, .date-picker .text-field { -fx-prompt-text-fill: #64748b !important; }
+/* Small labels need >= 4.5:1 contrast: #94a3b8 on #101a2b is 6.8:1 */
+.section-label, .nav-section { -fx-text-fill: #94a3b8 !important; }
+/* White on #0f766e is 5.5:1, compared with 3.7:1 on #0d9488 */
+.primary-button { -fx-background-color: #0f766e !important; }
+.primary-button:hover { -fx-background-color: #115e59 !important; }
+
+/* Login/first-run card stays light in both themes, so use dark text on its fields */
+.auth-card .text-field,
+.auth-card .password-field,
+.auth-card .form-field,
+.auth-card .combo-box,
+.auth-card .text-area .content {
+    -fx-background-color: #f8fafc !important;
+    -fx-border-color: #cbd5e1 !important;
+    -fx-text-fill: #0f172a !important;
+    -fx-prompt-text-fill: #64748b !important;
+    -fx-highlight-fill: #99f6e4;
+    -fx-highlight-text-fill: #0f172a;
+}
+.auth-card .text-field:focused,
+.auth-card .password-field:focused { -fx-border-color: #0f766e !important; -fx-background-color: white !important; }
+.auth-card .form-label { -fx-text-fill: #334155 !important; }
+.auth-card .auth-title { -fx-text-fill: #0f172a !important; }
+.auth-card .auth-subtitle, .auth-card .muted { -fx-text-fill: #475569 !important; }
+.auth-card .check-box { -fx-text-fill: #334155 !important; }
+
+/* Responsive dialog forms */
+.dialog-scroll, .dialog-scroll > .viewport { -fx-background-color: transparent; -fx-background: transparent; -fx-padding: 0; }
+.dialog-scroll { -fx-border-color: transparent; }
+.form-section { -fx-padding: 0 6 4 0; }

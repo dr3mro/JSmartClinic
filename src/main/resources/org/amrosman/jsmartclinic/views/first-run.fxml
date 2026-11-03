@@ -14,7 +14,7 @@
            fx:controller="org.amrosman.jsmartclinic.ui.auth.FirstRunController"
            styleClass="auth-root" stylesheets="@../app.css">
 
-    <VBox styleClass="auth-card" maxWidth="470" spacing="12">
+    <VBox styleClass="auth-card" maxWidth="470" maxHeight="-Infinity" spacing="12">
         <HBox styleClass="brand-box, auth-brand" spacing="2">
             <Label text="JSmart" styleClass="brand"/>
             <Label text="Clinic" styleClass="brand, brand-accent"/>

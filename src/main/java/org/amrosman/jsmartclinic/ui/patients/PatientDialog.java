@@ -12,7 +12,6 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -23,6 +22,7 @@ import org.amrosman.jsmartclinic.domain.Sex;
 import org.amrosman.jsmartclinic.service.PatientService;
 import org.amrosman.jsmartclinic.ui.components.Async;
 import org.amrosman.jsmartclinic.ui.components.Forms;
+import org.amrosman.jsmartclinic.ui.components.ResponsiveForm;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -132,37 +132,51 @@ public final class PatientDialog {
         mrnLabel.getStyleClass().add("chip");
         Label error = Forms.errorLabel();
 
-        GridPane grid = Forms.grid();
-        int row = 0;
-        Forms.row(grid, row++, "First name *", firstName);
-        Forms.row(grid, row++, "Last name *", lastName);
-        Forms.row(grid, row++, "Date of birth *", dob);
-        Forms.row(grid, row++, "Sex", sex);
-        Forms.row(grid, row++, "Phone", phone);
-        Forms.row(grid, row++, "Email", email);
-        Forms.row(grid, row++, "Address", address);
-        Forms.row(grid, row++, "City", city);
-        Forms.row(grid, row++, "National ID", nationalId);
-        Forms.row(grid, row++, "Blood type", bloodType);
-        Forms.row(grid, row++, "Marital status", maritalStatus);
-        Forms.row(grid, row++, "Occupation", occupation);
-        Forms.row(grid, row++, "Emergency contact", emergencyName);
-        Forms.row(grid, row++, "Emergency phone", emergencyPhone);
-        Forms.row(grid, row++, "Relationship", emergencyRelation);
-        Forms.row(grid, row++, "Insurance provider", insuranceProvider);
-        Forms.row(grid, row++, "Insurance number", insuranceNumber);
-        Forms.row(grid, row++, "Notes", notes);
+        ResponsiveForm form = new ResponsiveForm()
+                .section("Identity",
+                        ResponsiveForm.field("First name *", firstName),
+                        ResponsiveForm.field("Last name *", lastName),
+                        ResponsiveForm.field("Date of birth *", dob),
+                        ResponsiveForm.field("Sex", sex),
+                        ResponsiveForm.field("National ID", nationalId),
+                        ResponsiveForm.field("Marital status", maritalStatus),
+                        ResponsiveForm.field("Blood type", bloodType),
+                        ResponsiveForm.field("Occupation", occupation))
+                .section("Contact",
+                        ResponsiveForm.field("Phone", phone),
+                        ResponsiveForm.field("Email", email),
+                        ResponsiveForm.field("Address", address),
+                        ResponsiveForm.field("City", city))
+                .section("Emergency contact",
+                        ResponsiveForm.field("Name", emergencyName),
+                        ResponsiveForm.field("Phone", emergencyPhone),
+                        ResponsiveForm.field("Relationship", emergencyRelation))
+                .section("Insurance",
+                        ResponsiveForm.field("Provider", insuranceProvider),
+                        ResponsiveForm.field("Policy number", insuranceNumber))
+                .section("Notes",
+                        ResponsiveForm.wide(ResponsiveForm.field("Notes", notes)));
 
-        VBox content = new VBox(14,
-                new HBox(12, photoFrame, new VBox(6, choosePhoto, clearPhoto)),
-                new HBox(8, new Label("Record number:"), mrnLabel),
-                grid,
-                error);
-        content.setPadding(new Insets(4, 4, 0, 4));
+        photoView.setFitWidth(64);
+        photoView.setFitHeight(64);
+        photoFrame.setMinSize(68, 68);
+        photoFrame.setMaxSize(68, 68);
+        HBox photoButtons = new HBox(8, choosePhoto, clearPhoto);
+        Label mrnCaption = new Label("Record number");
+        mrnCaption.getStyleClass().add("form-label");
+        VBox headerInfo = new VBox(6, new HBox(8, mrnCaption, mrnLabel), photoButtons, photoHint);
+        HBox header = new HBox(14, photoFrame, headerInfo);
+        header.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        header.getStyleClass().add("form-header");
 
         Dialog<Patient> dialog = Forms.dialog(editing ? "Edit patient" : "Register patient",
                 editing ? "Update demographics for " + existing.fullName().trim() : "Create a new patient record",
-                content);
+                new VBox());
+        javafx.scene.control.ScrollPane scroll = form.fitInto(dialog, 780, 560);
+        VBox content = new VBox(14, header, scroll, error);
+        VBox.setVgrow(scroll, javafx.scene.layout.Priority.ALWAYS);
+        content.setPadding(new Insets(4, 4, 0, 4));
+        dialog.getDialogPane().setContent(content);
         ButtonType saveType = new ButtonType(editing ? "Save changes" : "Register patient", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(saveType, ButtonType.CANCEL);
 

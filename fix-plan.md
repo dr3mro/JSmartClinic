@@ -14,6 +14,21 @@ Severity: 🔴 Critical (data loss, safety, or security) · 🟠 High (feature b
 
 ---
 
+## ▶ RESUME HERE (status as of 2026-11-03 01:10)
+
+**Done:** S-0, C-00 → C-08. There are 10 commits; the last is `1215817`. See the Fix Log.
+**In progress:** **C-09.** The failing tests are written but **not committed** (`src/test/.../LabServiceTest.java`). They change `saveResult` to `saveResult(orderId, resultId, numeric, text)` and add `resultsCannotBeEnteredOnCancelledOrders`. Next, implement the service and repository change in `LabService.saveResult`/`LabRepository`, then update the callers in `ui/labs/LabResultDialog.java` and `ui/patients/PatientChartController.java`. After that, run `./mvnw -q clean verify` and commit as `fix(C-09)`.
+**Remaining (65):** C-09 C-10 C-11 · A-01 → A-15 · B-01 → B-07 · D-01 → D-05 · P-01 → P-05 · U-01 → U-06 · H-01 → H-07 · V-01 → V-18 (Batch 8, visual UI)
+
+**Migration numbering:** V003–V007 are already used, one migration per fix. **The next migration is `V008__…sql`.** Wherever this plan says "V003", use the next free number instead, and add it to `index.txt`.
+
+**Resume prompt for opencode:**
+```
+Continue fix-plan.md from the "RESUME HERE" section. First run `git status` and `./mvnw -q clean verify` to confirm the state. Finish C-09 (its tests are already written and uncommitted), then continue in order from C-10. Follow the Agent instructions at the top of fix-plan.md (test first, one commit per issue, new migrations start at V008 and go in index.txt, tick the box and update the Fix Log). Before stopping, update this RESUME HERE section with the new status, the next migration number and the next issue ID. Ask me if a fix needs a design decision.
+```
+
+---
+
 ## Step 0 — Safety net
 - [x] **S-0** The project is **not a git repository** (there is no `.git`). Run `git init`. Add `.DS_Store`, `.idea/workspace.xml`, `*.bak` and `backup/` to `.gitignore`. Delete the stray `.DS_Store` files. Make a baseline commit **before** you change anything else.
 
@@ -233,6 +248,72 @@ Severity: 🔴 Critical (data loss, safety, or security) · 🟠 High (feature b
 - [ ] **H-05** CI's `macos-latest` builds only an **arm64** DMG. Add a `macos-13` (Intel) job if you need to support Intel Macs.
 - [ ] **H-06** In `Database`, the `:memory:` path handling is broken: `toAbsolutePath()` turns it into a real file named `:memory:`. Fix it, or remove the special case.
 - [ ] **H-07** Add a `MigrationRunner` test that applies all migrations to a **copy of a database at version 2**. This proves `V003+` upgrade existing installs.
+
+---
+
+## Batch 8 — Visual UI review (dark theme, 1360×860, reviewed 2026-11-03) 🟡
+
+> These findings come from screenshots of the packaged app. Fix them after Batch 7, unless one blocks a workflow (V-01 and V-02 do).
+
+- [ ] **V-01 🟠 The Appointments day view looks fully booked when it's empty** — `views/appointments.fxml`, `AppointmentsController`
+  - *Problem:* Every hour slot (08:00 onward) draws as a solid green block across the whole day, so an empty day looks booked. The day header ("Tuesday · 3 Nov") is hidden behind the block.
+  - *Fix:* Empty slots should be transparent with only thin hour lines, plus a hover highlight. Only real appointments get a colored card, with the patient, time and status shown. Keep the day header above the grid.
+- [ ] **V-02 🟠 Toolbar buttons are cut off** — Appointments and Lab Results toolbars
+  - *Problem:* Labels are truncated: `…`, `W…`, `To…`, `Chec…`, `Start v…`, `Compl…`, `Can…`, `+ New appointm…`, `3 li…`, `Refr…`, `Tr…`, `Mark collec…`, `Enter re…`, `Cancel or…`, `+ Order l…`.
+  - *Fix:* Set `minWidth="-Infinity"` (use the preferred size) on these buttons. Wrap the toolbar in a `FlowPane`, or put secondary actions (Cancel, Complete) in an overflow `MenuButton`. Use icon and label pairs with tooltips. The buttons must not truncate at the minimum window width of 1100px.
+- [ ] **V-03 🟠 Date pickers can't be read in dark mode** — Appointments and Reports (`From`/`To`)
+  - *Problem:* The `DatePicker` editor has a white background with light grey text.
+  - *Fix:* In `app-dark.css`, style `.date-picker .text-field`, `.date-picker .arrow-button` and the popup (`.date-picker-popup`) to match the other text fields.
+- [ ] **V-04 🟡 Disabled buttons are almost invisible, and Archive reads as "danger"** — Patients, Billing, Labs, Prescriptions
+  - *Problem:* Disabled buttons drop to about 20% contrast, so users can't tell which actions exist.
+  - *Fix:* Use about 45% opacity while disabled, and keep the text legible. Show a tooltip explaining why ("Select a patient first"). The `Include archived` checkbox label looks disabled too, so fix its color.
+- [ ] **V-05 🟡 Empty charts show fake axes** — Reports
+  - *Problem:* With no data, Revenue, Appointments by provider and Top diagnoses draw a 0–150 axis and a flat line. Demographics shows a single dot.
+  - *Fix:* Show the same empty state used elsewhere ("No data for this period"). Set the axis range from the data. Show the pie legend in readable form ("Male", not `MALE`), with counts and percentages.
+- [ ] **V-06 🟡 Duplicate actions and search fields**
+  - *Problem:* The Dashboard has **New Patient** twice (the top bar and the Recent patients card). Patients has **New Patient** twice and **two search boxes** (global and page).
+  - *Fix:* Keep the global search in the top bar, and on the Patients page make it filter the table, or drop the page search. Remove duplicate New Patient buttons, keeping the top-bar one.
+- [ ] **V-07 🟡 The top bar sits above the sidebar** — `main-view.fxml`
+  - *Problem:* The page title bar spans the full width, and the "JSmart Clinic" brand starts *below* it, which looks misaligned.
+  - *Fix:* Make the sidebar full height (`BorderPane left`), with the top bar only in the content area (`center` = `VBox(topbar, contentArea)`).
+- [ ] **V-08 🟡 The window title repeats itself**
+  - *Problem:* The title reads "JSmartClinic — JSmartClinic" when the clinic name is the default.
+  - *Fix:* Show only "JSmartClinic" when the clinic name is blank or equals the default.
+- [ ] **V-09 🟡 Placeholder clinic details are seeded and printed on PDFs** — Settings → Clinic profile
+  - *Problem:* "1 Health Street", "+1 555 0100" and `front-desk@jsmartclinic.local` come pre-filled, so they print on real prescriptions and receipts.
+  - *Fix:* Seed these as empty. Make the first-run wizard ask for them. Before generating a PDF, warn if the clinic profile is incomplete.
+- [ ] **V-10 🟡 A status label is cut off** — Settings → Preferences card
+  - *Problem:* The "Loaded…" status text under Backups is clipped by the bottom of the card.
+  - *Fix:* Add bottom padding, or move the status next to the Save button.
+- [ ] **V-11 ⚪ Empty-row striping** — Patients, Encounters, Prescriptions, Labs, Recent patients
+  - *Problem:* Tables draw a dozen empty striped rows below the data.
+  - *Fix:* Hide the striping on empty rows (`.table-row-cell:empty { -fx-background-color: transparent; -fx-border-color: transparent; }`).
+- [ ] **V-12 ⚪ Truncated column headers and values**
+  - *Problem:* "Dose / frequ…" (Prescriptions) and "3.5 – 5.1 mm…" (Labs reference) are cut off.
+  - *Fix:* Use wider columns or wrapping header labels, and a tooltip with the full value.
+- [ ] **V-13 ⚪ The Labs pending count is ambiguous**
+  - *Problem:* It shows "1 pending" next to 3 lines. Label it "1 order pending (3 tests)".
+- [ ] **V-14 🟠 Table rows can't be selected through accessibility** (VoiceOver and automation)
+  - *Problem:* Setting `AXSelected` on a patient row doesn't update the JavaFX selection, so Open chart and Edit stay disabled. This also blocks screen-reader users.
+  - *Fix:* Double-click and Enter on a row should open it. Check that each `TableView` works with keyboard navigation (arrow keys, then Enter). Consider an "Open" link button in each row.
+- [x] **V-16 🟠 Login screen** *(fixed by hand on 2026-11-03, uncommitted: `maxHeight="-Infinity"` on the login and first-run cards, `.auth-brand .brand` dark text, new prompt texts. Still to do: hide the clinic chip when the name is the default, and a dark card in dark mode)* — `views/login.fxml`, `app.css`/`app-dark.css`
+  - *Problem:* The brand shows only **"Clinic"**, because "JSmart" is white text on the white card (it uses the sidebar's `.brand` style). The card runs to the bottom edge of the window and gets clipped: it isn't vertically centred and has a large empty area below the form. The password prompt text is a row of dots (`••••••••••`), which looks like a saved password. The username hint "e.g. admin" hints at a guessable account name. The "JSmartClinic" chip repeats the brand.
+  - *Fix:* Add a login-specific `.login-brand` style with dark text for "JSmart". Centre a fixed-height card (about 460px) with `StackPane` alignment and margins. Use prompt texts "Enter your username" and "Enter your password". Show the clinic name chip only when a custom clinic name is set. Make the card follow the theme too (dark card in dark mode).
+- [x] **V-17 🔴 Dark-theme colours: white text areas and date fields, low contrast** *(quick CSS fix applied by hand on 2026-11-03, uncommitted; the root-cause fix below is still open)*
+  - *Problem:* In the encounter editor (dark theme), the Subjective, Objective, Assessment and Plan text areas, "Previous pregnancies", and every `DatePicker` render **bright white**, so light text on them is unreadable. **Root cause:** `main-view.fxml`, `login.fxml` and `first-run.fxml` set `stylesheets="@../app.css"` on their root node. Node-level stylesheets **outrank** the scene stylesheets that `ThemeManager` adds, so light rules (e.g. `.text-area.form-field .content`) beat `app-dark.css`. The dark theme also never sets `-fx-control-inner-background`.
+  - *Measured contrast (WCAG AA needs 4.5:1 for small text):* `.section-label` was 3.7:1 (dark) and 2.6:1 (light); white text on `.primary-button` `#0d9488` was 3.7:1. The quick fix raises these to 6.8:1, 4.8:1 and 5.5:1.
+  - *Quick fix applied:* `!important` overrides at the end of `app-dark.css` (looked-up colours on `.root`, the text area content, the date-picker editor, prompt text, section labels, the primary button), plus contrast fixes at the end of `app.css`.
+  - *Also fixed:* on the login and first-run card (always white), the dark theme made typed text and password dots light grey on a light field. Added `.auth-card` overrides with dark text (`#0f172a`, 17:1).
+  - *Proper fix (to do):* Make `ThemeManager.apply()` set the theme on the **root node** (`root.getStylesheets().setAll(app.css[, app-dark.css])`) instead of only on the scene, or remove `stylesheets=` from those root FXMLs (keep it for Scene Builder through `fx:define` or a preview-only setting). Then remove the `!important` rules. Define the palette once as looked-up colours (`-c-bg`, `-c-surface`, `-c-text`, `-c-muted`, `-c-accent`) on `.root` in each theme, and reference them everywhere. Add a test that loads every FXML under the dark theme and checks that no `TextInputControl` has a white background.
+- [ ] **V-18 🟠 Encounter editor details**
+  - *Problem:* It defaulted to the **Obstetrics & Gynaecology** template for a **male** patient seen by a **Cardiology** doctor; the default should come from the provider's specialty and never pick sex-specific templates that don't fit. The chief complaint field has **no label**. Numeric count fields (Gravida, Para, Abortions) show prompts like "0.0 – 30.0", which look like entered values and suggest decimals for whole-number counts.
+  - *Fix:* Choose the default template from the provider's specialty, and filter out sex-specific templates that don't match the patient. Add a "Chief complaint" label. Use integer spinners for counts, and prompts like "e.g. 2" in the prompt-text colour.
+- [x] **V-19 🟠 The patient dialog was taller than the screen** *(fixed by hand on 2026-11-03, uncommitted)*
+  - *Problem:* It was one 18-row label/field grid with no scroll pane, so on a laptop screen the bottom fields and the Register/Cancel buttons ended up off-screen.
+  - *Fix applied:* Added a new `ui/components/ResponsiveForm`. Fields are grouped into sections (Identity, Contact, Emergency contact, Insurance, Notes), each with its label above the field. The layout uses **2 columns**, dropping to **1 column under 620px**. The form scrolls inside the dialog, which is capped at 90% of the current screen's height (and 92% of its width) and can be resized; the buttons always stay visible. The photo and MRN header is now compact.
+  - *To do:* Use `ResponsiveForm` for the other long dialogs (appointment, invoice, prescription, user), and delete the now-unused `Forms.row`/`Forms.grid` once nothing uses them.
+- [ ] **V-15 ⚪ Still to review (needs a click-through)**
+  - Patient chart tabs, the patient, appointment, invoice and payment dialogs, the first-run screen, the lock dialog, the light theme, Arabic/RTL, and the 1100×700 minimum window size.
 
 ---
 

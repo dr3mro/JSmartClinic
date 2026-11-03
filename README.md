@@ -176,3 +176,4 @@ database after taking a safety backup.
   current user and not read-only. The app creates it with owner-only permissions.
 - **Restore does not take effect immediately** — close and reopen the app after restoring.
 - **CI has no display** — `./mvnw verify` is headless and does not need a display server.
+# JSmartClinic

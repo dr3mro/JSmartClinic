@@ -76,14 +76,14 @@ class LabServiceTest {
         assertThat(hgbRow.orderStatus()).isEqualTo(LabOrderStatus.ORDERED);
         assertThat(hgbRow.valueNum()).isNull();
 
-        LabFlag low = context.labs().saveResult(orderId, patient.id(), hgbRow.resultId(), hgb.id(), 10.0, null);
+        LabFlag low = context.labs().saveResult(orderId, hgbRow.resultId(), 10.0, null);
         assertThat(low).isEqualTo(LabFlag.LOW);
         assertThat(context.labs().forPatient(patient.id()).stream()
                 .filter(r -> r.testCode().equals("HGB")).findFirst().orElseThrow().orderStatus())
                 .isEqualTo(LabOrderStatus.COLLECTED);
 
         LabRepository.LabRow wbcRow = row(orderId, "WBC");
-        LabFlag normal = context.labs().saveResult(orderId, patient.id(), wbcRow.resultId(), wbc.id(), 5.0, null);
+        LabFlag normal = context.labs().saveResult(orderId, wbcRow.resultId(), 5.0, null);
         assertThat(normal).isEqualTo(LabFlag.NORMAL);
         assertThat(context.labs().forPatient(patient.id()).get(0).orderStatus()).isEqualTo(LabOrderStatus.RESULTED);
         assertThat(context.labs().pending()).isEmpty();
@@ -93,6 +93,48 @@ class LabServiceTest {
 
         assertThatThrownBy(() -> context.labs().order(patient.id(), null, List.of()))
                 .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void resultsCannotBeEnteredOnCancelledOrders() {
+        long orderId = context.labs().order(patient.id(), null, List.of(hgb.id()));
+        LabRepository.LabRow row = row(orderId, "HGB");
+        context.labs().cancel(orderId, patient.id());
+
+        assertThatThrownBy(() -> context.labs().saveResult(orderId, row.resultId(), 10.0, null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("cancelled");
+
+        assertThat(context.labs().forPatient(patient.id()).get(0).orderStatus())
+                .isEqualTo(LabOrderStatus.CANCELLED);
+        assertThat(context.labs().forPatient(patient.id()).get(0).valueNum()).isNull();
+    }
+
+    @Test
+    void resultsMustBelongToTheOrderBeingSaved() {
+        long first = context.labs().order(patient.id(), null, List.of(hgb.id()));
+        long second = context.labs().order(patient.id(), null, List.of(wbc.id()));
+        LabRepository.LabRow hgbRow = row(first, "HGB");
+
+        assertThatThrownBy(() -> context.labs().saveResult(second, hgbRow.resultId(), 10.0, null))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> context.labs().saveResult(second, 999_999L, 10.0, null))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void resultFlagsAndAuditPatientComeFromTheStoredOrder() {
+        LabTest potassium = test("K");
+        long orderId = context.labs().order(patient.id(), null, List.of(potassium.id()));
+        LabRepository.LabRow row = row(orderId, "K");
+
+        LabFlag flag = context.labs().saveResult(orderId, row.resultId(), 6.8, null);
+
+        assertThat(flag).isEqualTo(LabFlag.CRITICAL);
+        assertThat(context.labs().forPatient(patient.id()).get(0).flag()).isEqualTo(LabFlag.CRITICAL);
+        context.session().login(context.users().byId(1));
+        assertThat(context.auditEvents().forPatient(patient.id(), 50))
+                .anyMatch(event -> "lab_result".equals(event.entity()));
     }
 
     @Test
