@@ -254,4 +254,4 @@ Severity: 🔴 Critical (data loss, safety, or security) · 🟠 High (feature b
 | 2026-11-03 | C-05 | 9ac80c7 | Save/sign/delete now require the draft's provider; added audited `takeOverDraft()` for doctors/admins and a "Take over draft" editor action. |
 | 2026-11-03 | C-06 | a1cc44f | Added an editor change counter; autosave clears the dirty flag only when no edits arrived while the save was in flight. |
 | 2026-11-03 | C-07 | 33c889e | Added `Navigator.CanLeave`; navigation, logout and lock now ask the editor to save/confirm first. Automatic locks save silently and never wait for a prompt. New `NavigationGuardTest`. |
-| 2026-11-03 | C-08 | pending | Added explicit `crit_low`/`crit_high` limits (V007) seeded for potassium, sodium and glucose. CRITICAL now requires crossing a critical limit; the Settings editor and result preview use the same logic. |
+| 2026-11-03 | C-08 | 5671184 | Added explicit `crit_low`/`crit_high` limits (V007) seeded for potassium, sodium and glucose. CRITICAL now requires crossing a critical limit; the Settings editor and result preview use the same logic. |
