@@ -116,6 +116,15 @@ public final class LabRepository {
         }
     }
 
+    /** The result line with its order, test and patient, or {@code null} if it does not exist. */
+    public LabRow resultRow(long resultId) {
+        try (Connection c = database.getConnection()) {
+            return Jdbc.one(c, ROW_SQL + "WHERE r.id=?", this::row, resultId);
+        } catch (SQLException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
     public List<LabRow> pendingRows() {
         try (Connection c = database.getConnection()) {
             return Jdbc.list(c, ROW_SQL + "WHERE o.status IN ('ORDERED','COLLECTED') ORDER BY o.ordered_at",

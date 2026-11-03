@@ -236,6 +236,11 @@ public final class AppContext {
         return auditService;
     }
 
+    /** Audit trail queries (same service as {@link #audit()}). */
+    public AuditService auditEvents() {
+        return auditService;
+    }
+
     public PdfService pdf() {
         return pdfService;
     }

@@ -78,8 +78,8 @@ public final class LabResultDialog {
                     return;
                 }
                 dialog.getDialogPane().lookupButton(saveType).setDisable(true);
-                Async.run(() -> context.labs().saveResult(row.orderId(), row.patientId(), row.resultId(),
-                                row.testId(), numeric, textValue), flag -> {
+                Async.run(() -> context.labs().saveResult(row.orderId(), row.resultId(),
+                                numeric, textValue), flag -> {
                             dialog.setResult(null);
                             dialog.close();
                             if (onSaved != null) {

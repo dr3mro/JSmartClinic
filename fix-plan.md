@@ -17,7 +17,7 @@ Severity: 🔴 Critical (data loss, safety, or security) · 🟠 High (feature b
 ## ▶ RESUME HERE (status as of 2026-11-03 01:10)
 
 **Done:** S-0, C-00 → C-08. There are 10 commits; the last is `1215817`. See the Fix Log.
-**In progress:** **C-09.** The failing tests are written but **not committed** (`src/test/.../LabServiceTest.java`). They change `saveResult` to `saveResult(orderId, resultId, numeric, text)` and add `resultsCannotBeEnteredOnCancelledOrders`. Next, implement the service and repository change in `LabService.saveResult`/`LabRepository`, then update the callers in `ui/labs/LabResultDialog.java` and `ui/patients/PatientChartController.java`. After that, run `./mvnw -q clean verify` and commit as `fix(C-09)`.
+**Done since:** C-09 (`saveResult(orderId, resultId, numeric, text)` reads test, patient and status from the DB; rejects cancelled or mismatched orders). **Previously in progress:** **C-09.** The failing tests are written but **not committed** (`src/test/.../LabServiceTest.java`). They change `saveResult` to `saveResult(orderId, resultId, numeric, text)` and add `resultsCannotBeEnteredOnCancelledOrders`. Next, implement the service and repository change in `LabService.saveResult`/`LabRepository`, then update the callers in `ui/labs/LabResultDialog.java` and `ui/patients/PatientChartController.java`. After that, run `./mvnw -q clean verify` and commit as `fix(C-09)`.
 **Remaining (65):** C-09 C-10 C-11 · A-01 → A-15 · B-01 → B-07 · D-01 → D-05 · P-01 → P-05 · U-01 → U-06 · H-01 → H-07 · V-01 → V-18 (Batch 8, visual UI)
 
 **Migration numbering:** V003–V007 are already used, one migration per fix. **The next migration is `V008__…sql`.** Wherever this plan says "V003", use the next free number instead, and add it to `index.txt`.
@@ -75,7 +75,7 @@ Continue fix-plan.md from the "RESUME HERE" section. First run `git status` and 
   - *Fix:* `V003`: `ALTER TABLE lab_tests ADD COLUMN crit_low REAL; ADD COLUMN crit_high REAL`. Flag CRITICAL **only** when an explicit critical limit is crossed. Otherwise flag LOW, HIGH or NORMAL. Add critical-limit fields to the lab catalogue editor in Settings. Seed only well-known limits (e.g. K <2.5/>6.5, Na <120/>160, glucose <40/>450), each with a comment.
   - *Tests:* Glucose 130 is HIGH, not CRITICAL. K 6.8 is CRITICAL.
 
-- [ ] **C-09 🟠 Lab results can be entered on a cancelled order, or against the wrong test** — `LabService.saveResult`
+- [x] **C-09 🟠 Lab results can be entered on a cancelled order, or against the wrong test** — `LabService.saveResult`
   - *Problem:* It trusts the `testId` and `patientId` from the caller and never checks that `resultId` belongs to `orderId`. A cancelled order gets silently reopened as COLLECTED or RESULTED.
   - *Fix:* Load the result row with its order, and take the test and patient from the database. Reject the save if the order is `CANCELLED`.
 
@@ -335,4 +335,5 @@ Continue fix-plan.md from the "RESUME HERE" section. First run `git status` and 
 | 2026-11-03 | C-05 | 9ac80c7 | Save/sign/delete now require the draft's provider; added audited `takeOverDraft()` for doctors/admins and a "Take over draft" editor action. |
 | 2026-11-03 | C-06 | a1cc44f | Added an editor change counter; autosave clears the dirty flag only when no edits arrived while the save was in flight. |
 | 2026-11-03 | C-07 | 33c889e | Added `Navigator.CanLeave`; navigation, logout and lock now ask the editor to save/confirm first. Automatic locks save silently and never wait for a prompt. New `NavigationGuardTest`. |
+| 2026-11-03 | C-09 | (this commit) | `LabService.saveResult` now takes only order and result IDs, loads the row with `LabRepository.resultRow`, rejects cancelled or mismatched orders, and audits the stored patient. Added `AppContext.auditEvents()`. |
 | 2026-11-03 | C-08 | 5671184 | Added explicit `crit_low`/`crit_high` limits (V007) seeded for potassium, sodium and glucose. CRITICAL now requires crossing a critical limit; the Settings editor and result preview use the same logic. |

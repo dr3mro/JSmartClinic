@@ -99,18 +99,25 @@ public final class LabService {
         audit.log(AuditAction.UPDATE, "lab_order", orderId, patientId, "Order cancelled");
     }
 
-    public LabFlag saveResult(long orderId, long patientId, long resultId, long testId, Double numeric,
-                              String text) {
+    /**
+     * Saves one result line. The test, patient and order status are read from the database,
+     * never trusted from the caller.
+     */
+    public LabFlag saveResult(long orderId, long resultId, Double numeric, String text) {
         session.require(Permission.LABS);
-        LabTest test = labs.testById(testId);
+        LabRepository.LabRow row = labs.resultRow(resultId);
+        if (row == null || row.orderId() != orderId) {
+            throw new IllegalArgumentException("This result does not belong to the selected lab order");
+        }
+        if (row.orderStatus() == LabOrderStatus.CANCELLED) {
+            throw new IllegalArgumentException("Results cannot be entered on a cancelled order");
+        }
+        LabTest test = labs.testById(row.testId());
         LabFlag flag = flagFor(test, numeric);
         labs.saveResult(resultId, numeric, text, flag);
-        if (labs.allResultsEntered(orderId)) {
-            labs.setOrderStatus(orderId, LabOrderStatus.RESULTED);
-        } else {
-            labs.setOrderStatus(orderId, LabOrderStatus.COLLECTED);
-        }
-        audit.log(AuditAction.UPDATE, "lab_result", resultId, patientId, "Result entered");
+        labs.setOrderStatus(orderId, labs.allResultsEntered(orderId)
+                ? LabOrderStatus.RESULTED : LabOrderStatus.COLLECTED);
+        audit.log(AuditAction.UPDATE, "lab_result", resultId, row.patientId(), "Result entered");
         return flag;
     }
 
