@@ -20,31 +20,37 @@
         <ikonli.version>12.4.0</ikonli.version>
         <mainClass>org.amrosman.jsmartclinic.HelloApplication</mainClass>
         <app.version>1.0.0</app.version>
+        <!-- Overridden by -Djavafx.bundled builds: extra jlink modules and dependency groups to skip -->
+        <jpackage.fx.modules>java.base</jpackage.fx.modules>
+        <package.exclude.groups></package.exclude.groups>
     </properties>
 
     <dependencies>
-        <!-- JavaFX -->
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-controls</artifactId>
-            <version>${javafx.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-fxml</artifactId>
-            <version>${javafx.version}</version>
-        </dependency>
+        <!-- JavaFX comes from Maven (profile javafx-from-maven) or from a JDK that bundles it
+             (-Djavafx.bundled, e.g. Azul Zulu JDK FX for Windows ARM64). -->
 
         <!-- UI extras (kept) -->
         <dependency>
             <groupId>org.controlsfx</groupId>
             <artifactId>controlsfx</artifactId>
             <version>11.2.1</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.openjfx</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.kordamp.ikonli</groupId>
             <artifactId>ikonli-javafx</artifactId>
             <version>${ikonli.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.openjfx</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.kordamp.ikonli</groupId>
@@ -191,6 +197,40 @@
     </build>
 
     <profiles>
+        <!-- Default: JavaFX from Maven Central (macOS, Windows x64, Linux). -->
+        <profile>
+            <id>javafx-from-maven</id>
+            <activation>
+                <property>
+                    <name>!javafx.bundled</name>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>org.openjfx</groupId>
+                    <artifactId>javafx-controls</artifactId>
+                    <version>${javafx.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.openjfx</groupId>
+                    <artifactId>javafx-fxml</artifactId>
+                    <version>${javafx.version}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+        <!-- JavaFX already inside the JDK (Azul Zulu JDK FX), used for Windows ARM64. -->
+        <profile>
+            <id>javafx-bundled</id>
+            <activation>
+                <property>
+                    <name>javafx.bundled</name>
+                </property>
+            </activation>
+            <properties>
+                <jpackage.fx.modules>javafx.controls,javafx.fxml</jpackage.fx.modules>
+                <package.exclude.groups>org.openjfx</package.exclude.groups>
+            </properties>
+        </profile>
         <profile>
             <id>package-mac</id>
             <build>
@@ -208,6 +248,7 @@
                                 </goals>
                                 <configuration>
                                     <includeScope>runtime</includeScope>
+                                    <excludeGroupIds>${package.exclude.groups}</excludeGroupIds>
                                     <outputDirectory>${project.build.directory}/package-input</outputDirectory>
                                 </configuration>
                             </execution>
@@ -248,6 +289,7 @@
                                 <addModule>jdk.crypto.ec</addModule>
                                 <addModule>jdk.localedata</addModule>
                                 <addModule>jdk.charsets</addModule>
+                                <addModule>${jpackage.fx.modules}</addModule>
                             </addModules>
                             <type>DMG</type>
                             <javaOptions>
@@ -286,6 +328,7 @@
                                 </goals>
                                 <configuration>
                                     <includeScope>runtime</includeScope>
+                                    <excludeGroupIds>${package.exclude.groups}</excludeGroupIds>
                                     <outputDirectory>${project.build.directory}/package-input</outputDirectory>
                                 </configuration>
                             </execution>
@@ -326,6 +369,7 @@
                                 <addModule>jdk.crypto.ec</addModule>
                                 <addModule>jdk.localedata</addModule>
                                 <addModule>jdk.charsets</addModule>
+                                <addModule>${jpackage.fx.modules}</addModule>
                             </addModules>
                             <type>EXE</type>
                             <winMenu>true</winMenu>
