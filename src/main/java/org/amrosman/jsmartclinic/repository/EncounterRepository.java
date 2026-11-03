@@ -105,6 +105,13 @@ public final class EncounterRepository {
     }
 
     /** Marks the original signed note as amended without touching its content. */
+    /** Reassigns an unsigned draft to another provider. */
+    public void assignProvider(long id, long providerId) {
+        Jdbc.transaction(database, c -> Jdbc.update(c,
+                "UPDATE encounters SET provider_id=?, updated_at=? WHERE id=? AND signed_at IS NULL",
+                providerId, Instant.now(), id));
+    }
+
     public void markAmended(long originalId) {
         Jdbc.transaction(database, c -> Jdbc.update(c,
                 "UPDATE encounters SET status='AMENDED', updated_at=? WHERE id=?",

@@ -78,6 +78,7 @@ public class EncounterEditorController implements ContextAware, Navigator.ParamA
     @FXML private Button saveButton;
     @FXML private Button signButton;
     @FXML private Button addendumButton;
+    @FXML private Button takeOverButton;
     @FXML private Button addDiagnosisButton;
     @FXML private Button removeDiagnosisButton;
     @FXML private Button addVitalButton;
@@ -211,7 +212,8 @@ public class EncounterEditorController implements ContextAware, Navigator.ParamA
         applying = true;
         base = loaded.encounter();
         patient = loaded.patient();
-        editable = !base.signed() && context.session().can(Permission.ENCOUNTERS);
+        editable = !base.signed() && context.session().can(Permission.ENCOUNTERS)
+                && base.providerId() == context.session().userId();
 
         avatarLabel.setText(patient == null ? "?" : patient.initials());
         patientName.setText(patient == null ? "Encounter #" + base.id() : patient.fullName().trim());
@@ -275,6 +277,12 @@ public class EncounterEditorController implements ContextAware, Navigator.ParamA
         signButton.setManaged(value);
         addendumButton.setVisible(!value && base != null && base.signed());
         addendumButton.setManaged(addendumButton.isVisible());
+        boolean canTakeOver = base != null && !base.signed() && !value
+                && context.session().can(Permission.ENCOUNTERS)
+                && (context.session().role() == org.amrosman.jsmartclinic.domain.Role.DOCTOR
+                    || context.session().role() == org.amrosman.jsmartclinic.domain.Role.ADMIN);
+        takeOverButton.setVisible(canTakeOver);
+        takeOverButton.setManaged(canTakeOver);
         boolean vital = base != null && !base.signed() && context.session().can(Permission.VITALS);
         addVitalButton.setVisible(vital);
         addVitalButton.setManaged(vital);
@@ -476,6 +484,21 @@ public class EncounterEditorController implements ContextAware, Navigator.ParamA
             updateButtons();
             Dialogs.error(throwable);
         });
+    }
+
+    @FXML
+    private void onTakeOver() {
+        if (base == null) {
+            return;
+        }
+        if (!Dialogs.confirm("Take over draft",
+                "Make this draft yours? The previous provider will no longer be able to edit it.")) {
+            return;
+        }
+        Async.run(() -> context.encounters().takeOverDraft(base.id()), ignored -> {
+            Toasts.success("Draft taken over");
+            load();
+        }, Dialogs::error);
     }
 
     @FXML

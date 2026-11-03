@@ -44,7 +44,7 @@ Severity: 🔴 Critical (data loss, safety, or security) · 🟠 High (feature b
   - *Problem:* The check is `chiefComplaint()==null && …`, but `start()` inserts `""`, so the check always passes.
   - *Fix:* Use `isBlank()`, and require at least a chief complaint **or** an assessment/plan.
 
-- [ ] **C-05 🟠 Any provider can edit another provider's draft** — `EncounterService.save/sign/deleteDraft`
+- [x] **C-05 🟠 Any provider can edit another provider's draft** — `EncounterService.save/sign/deleteDraft`
   - *Fix:* Only the draft's `provider_id` may save, sign or delete it. Add an explicit "take over draft" action, available to DOCTOR and ADMIN, that writes an audit entry.
 
 - [ ] **C-06 🟠 Autosave can silently drop edits** — `EncounterEditorController.persist`
@@ -251,3 +251,4 @@ Severity: 🔴 Critical (data loss, safety, or security) · 🟠 High (feature b
 | 2026-11-03 | C-02 | c9f3f45 | Replaced the signed-encounter trigger (V005): signed content and metadata are immutable, only `SIGNED -> AMENDED` is allowed, and signed rows cannot be deleted. Extended JDBC trigger tests. |
 | 2026-11-03 | C-03 | 52feecb | Diagnosis and vital writes now load the stored row, reject signed encounters, derive the audit patient from the database, and are guarded by new triggers (V006). |
 | 2026-11-03 | C-04 | 040972f | Signing now uses `isBlank()` and requires a chief complaint or a non-blank assessment/plan. Added an empty/whitespace signing test. |
+| 2026-11-03 | C-05 | pending | Save/sign/delete now require the draft's provider; added audited `takeOverDraft()` for doctors/admins and a "Take over draft" editor action. |

@@ -235,6 +235,30 @@ class EncounterServiceTest {
     }
 
     @Test
+    void onlyTheDraftProviderCanEditAndAnotherDoctorCanTakeItOver() {
+        Encounter draft = context.encounters().start(patient.id(), null, null, null);
+
+        context.session().login(context.users().byId(1));
+        TestSupport.addUser(context, "doctor2", Role.DOCTOR, "General");
+        TestSupport.login(context, "doctor2");
+
+        Encounter changed = TestSupport.withContent(draft, "Changed", "By another doctor", "", "Migraine", "");
+        assertThatThrownBy(() -> context.encounters().save(changed))
+                .isInstanceOf(AccessDeniedException.class).hasMessageContaining("provider");
+        assertThatThrownBy(() -> context.encounters().sign(draft.id()))
+                .isInstanceOf(AccessDeniedException.class).hasMessageContaining("provider");
+        assertThatThrownBy(() -> context.encounters().deleteDraft(draft.id()))
+                .isInstanceOf(AccessDeniedException.class).hasMessageContaining("provider");
+
+        Encounter taken = context.encounters().takeOverDraft(draft.id());
+        assertThat(taken.providerId()).isEqualTo(context.session().userId());
+        Encounter saved = context.encounters().save(TestSupport.withContent(taken, "Fever",
+                "Taken over", "", "Viral illness", ""));
+        assertThat(saved.providerId()).isEqualTo(context.session().userId());
+        assertThat(context.encounters().sign(saved.id()).status()).isEqualTo(EncounterStatus.SIGNED);
+    }
+
+    @Test
     void startingFromAppointmentLinksVisit() {
         var doctor = context.users().byId(context.session().userId());
         Instant start = LocalDate.now().atTime(15, 0).atZone(ZoneId.systemDefault()).toInstant();

@@ -43,6 +43,8 @@
         <Button fx:id="signButton" text="Sign encounter" onAction="#onSign" styleClass="primary-button"/>
         <Button fx:id="addendumButton" text="Create addendum" onAction="#onAddendum"
                 styleClass="primary-button"/>
+        <Button fx:id="takeOverButton" text="Take over draft" onAction="#onTakeOver"
+                styleClass="secondary-button" visible="false" managed="false"/>
         <Button fx:id="invoiceButton" text="Invoice" onAction="#onInvoice" styleClass="secondary-button"/>
     </HBox>
 

@@ -67,6 +67,7 @@ public final class EncounterService {
         if (existing == null) {
             throw new IllegalArgumentException("Encounter not found");
         }
+        requireDraftOwner(existing);
         if (existing.signedAt() != null) {
             throw new IllegalStateException("Signed encounters are read-only. Create an addendum instead.");
         }
@@ -84,6 +85,7 @@ public final class EncounterService {
         if (encounter == null) {
             throw new IllegalArgumentException("Encounter not found");
         }
+        requireDraftOwner(encounter);
         if (encounter.signedAt() != null) {
             throw new IllegalStateException("Encounter is already signed");
         }
@@ -117,8 +119,42 @@ public final class EncounterService {
 
     public void deleteDraft(long encounterId) {
         session.require(Permission.ENCOUNTERS);
+        Encounter existing = encounters.findById(encounterId);
+        if (existing == null) {
+            throw new IllegalArgumentException("Encounter not found");
+        }
+        requireDraftOwner(existing);
         encounters.deleteDraft(encounterId);
-        audit.log(AuditAction.DELETE, "encounter", encounterId, null, "Draft discarded");
+        audit.log(AuditAction.DELETE, "encounter", encounterId, existing.patientId(), "Draft discarded");
+    }
+
+    /** Lets a doctor or administrator take responsibility for another provider's draft. */
+    public Encounter takeOverDraft(long encounterId) {
+        session.require(Permission.ENCOUNTERS);
+        if (session.role() != org.amrosman.jsmartclinic.domain.Role.DOCTOR
+                && session.role() != org.amrosman.jsmartclinic.domain.Role.ADMIN) {
+            throw new AccessDeniedException("Only a doctor or administrator can take over a draft");
+        }
+        Encounter encounter = encounters.findById(encounterId);
+        if (encounter == null) {
+            throw new IllegalArgumentException("Encounter not found");
+        }
+        if (encounter.signedAt() != null) {
+            throw new IllegalStateException("Only an unsigned draft can be taken over");
+        }
+        long previousProvider = encounter.providerId();
+        if (previousProvider != session.userId()) {
+            encounters.assignProvider(encounterId, session.userId());
+            audit.log(AuditAction.UPDATE, "encounter", encounterId, encounter.patientId(),
+                    "Draft taken over from provider " + previousProvider);
+        }
+        return encounters.findById(encounterId);
+    }
+
+    private void requireDraftOwner(Encounter encounter) {
+        if (encounter.providerId() != session.userId()) {
+            throw new AccessDeniedException("Only the draft's provider can change this encounter");
+        }
     }
 
     public int drafts() {
